@@ -16,7 +16,7 @@ export const ChatController = {
          return
       }
       try {
-         const message = chatService.sendMessage(prompt, convId)
+         const message = await chatService.sendMessage(prompt, convId)
          res.json({ message })
       } catch (e) {
          res.status(500).json({ error: 'Failed to generate response.' })
