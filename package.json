@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "bun run index.ts",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "bun run build.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

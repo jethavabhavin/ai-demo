@@ -5,7 +5,8 @@
    "private": true,
    "scripts": {
       "start": "bun run index.ts",
-      "dev": "bun run --watch index.ts"
+      "dev": "bun run --watch index.ts",
+      "build": "bun build ./index.ts --target=node --outdir=dist"
    },
    "devDependencies": {
       "@types/bun": "latest",
@@ -16,6 +17,8 @@
    },
    "dependencies": {
       "dotenv": "^17.4.2",
-      "express": "^5.2.1"
+      "express": "^5.2.1",
+      "openai": "^6.45.0",
+      "zod": "^4.4.3"
    }
 }
