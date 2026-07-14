@@ -1,3 +1,5 @@
+import { getDb } from '../lib/mongodb'
+
 export interface Product {
    id: number
    name: string
@@ -6,28 +8,9 @@ export interface Product {
 }
 
 const productRepository = {
-   getProducts() {
-      const products: Product[] = [
-         {
-            id: 1,
-            name: 'T-Shirt',
-            status: true,
-            price: 100,
-         },
-         {
-            id: 2,
-            name: 'Mobile',
-            status: true,
-            price: 2500,
-         },
-         {
-            id: 3,
-            name: 'Laptop',
-            status: false,
-            price: 4500,
-         },
-      ]
-
+   async getProducts(): Promise<Product[]> {
+      const db = await getDb()
+      const products: Product[] = await db.collection<Product>('products').find().toArray()
       return products
    },
 }
