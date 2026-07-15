@@ -6,7 +6,11 @@ class ChatRouter {
    constructor(private fastify: FastifyInstance) {}
 
    public register(): void {
-      this.fastify.post('/api/chat', { schema: chatSchema }, ChatController.sendMessage)
+      this.fastify.post(
+         '/api/chat',
+         { preHandler: this.fastify.authenticate, schema: chatSchema },
+         ChatController.sendMessage,
+      )
    }
 }
 

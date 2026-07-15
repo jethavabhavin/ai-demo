@@ -6,7 +6,11 @@ class UploadRouter {
    constructor(private fastify: FastifyInstance) {}
 
    public register(): void {
-      this.fastify.post('/api/upload', { schema: uploadSchema }, UploadController.upload)
+      this.fastify.post(
+         '/api/upload',
+         { preHandler: this.fastify.authenticate, schema: uploadSchema },
+         UploadController.upload,
+      )
    }
 }
 

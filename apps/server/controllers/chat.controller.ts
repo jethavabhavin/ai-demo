@@ -2,8 +2,8 @@ import type { FastifyRequest, FastifyReply } from 'fastify'
 import { chatService } from './../services/chat.service'
 
 export const ChatController = {
-   async sendMessage(req: FastifyRequest<{ Body: { convId: string; prompt: string } }>, reply: FastifyReply) {
-      const { convId, prompt } = req.body
+   async sendMessage(req: FastifyRequest, reply: FastifyReply) {
+      const { convId, prompt } = req.body as { convId: string; prompt: string }
       try {
          const message = await chatService.sendMessage(prompt, convId)
          reply.send({ message })

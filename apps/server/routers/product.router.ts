@@ -6,7 +6,11 @@ class ProductRouter {
    constructor(private fastify: FastifyInstance) {}
 
    public register(): void {
-      this.fastify.get('/api/products', { schema: productSchema }, ProductController.getProducts)
+      this.fastify.get(
+         '/api/products',
+         { preHandler: this.fastify.authenticate, schema: productSchema },
+         ProductController.getProducts,
+      )
    }
 }
 

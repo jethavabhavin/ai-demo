@@ -53,6 +53,15 @@ await app.register(swagger, {
       },
       servers: [{ url: 'http://localhost:3001', description: 'Development server' }],
       tags: [{ name: 'user', description: 'User related endpoints' }],
+      components: {
+         securitySchemes: {
+            bearerAuth: {
+               type: 'http',
+               scheme: 'bearer',
+               bearerFormat: 'JWT',
+            },
+         },
+      },
    },
 })
 
