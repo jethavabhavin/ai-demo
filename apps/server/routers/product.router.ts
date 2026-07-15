@@ -1,0 +1,15 @@
+import type { FastifyInstance } from 'fastify'
+import { ProductController } from '../controllers/product.controller'
+import { productSchema } from '../schemas/product.schema'
+
+class ProductRouter {
+   constructor(private fastify: FastifyInstance) {}
+
+   public register(): void {
+      this.fastify.get('/api/products', { schema: productSchema }, ProductController.getProducts)
+   }
+}
+
+export default async function productRouter(fastify: FastifyInstance) {
+   new ProductRouter(fastify).register()
+}

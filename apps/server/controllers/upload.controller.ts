@@ -1,15 +1,15 @@
-import type { Request, Response } from 'express'
+import type { FastifyRequest, FastifyReply } from 'fastify'
 import { uploadService } from '../services/upload.service'
 
 export const UploadController = {
-   async upload(req: Request, res: Response) {
+   async upload(req: FastifyRequest<{ Body: { image: string } }>, reply: FastifyReply) {
       try {
          console.log(req.body)
          const stats = await uploadService.upload(req.body.image)
-         res.json({ stats })
+         reply.send({ stats })
       } catch (e) {
          console.error('Upload failed:', e)
-         res.status(400).json({ error: e instanceof Error ? e.message : 'Failed to upload image.' })
+         reply.status(400).send({ error: e instanceof Error ? e.message : 'Failed to upload image.' })
       }
    },
 }

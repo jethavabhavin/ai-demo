@@ -1,13 +1,13 @@
-import type { Request, Response } from 'express'
+import type { FastifyRequest, FastifyReply } from 'fastify'
 import { productService } from '../services/product.service'
 
 export const ProductController = {
-   async getProducts(req: Request, res: Response) {
+   async getProducts(req: FastifyRequest, reply: FastifyReply) {
       try {
          const product = await productService.getProducts()
-         res.json({ data: product })
+         reply.send({ data: product })
       } catch (e) {
-         res.status(500).json({ error: 'Failed to generate response.' })
+         reply.status(500).send({ error: 'Failed to generate response.' })
       }
    },
 }
