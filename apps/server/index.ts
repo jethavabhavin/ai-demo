@@ -6,6 +6,8 @@ import swaggerUi from '@fastify/swagger-ui'
 import chatRouter from './routers/chat.router'
 import productRouter from './routers/product.router'
 import uploadRouter from './routers/upload.router'
+import userRouter from './routers/use.router'
+import fastifyJwt from '@fastify/jwt'
 
 dotenv.config()
 
@@ -18,6 +20,24 @@ const app = Fastify({
 await app.register(cors, {
    origin: true,
    credentials: false,
+})
+
+/**
+ * JWT autharazation
+ */
+app.register(fastifyJwt, {
+   secret: process.env.JWT_ACCESS_SECRET || '',
+})
+
+/**
+ * Decorator to protect routes — verifies the JWT
+ */
+app.decorate('authenticate', async function (request: any, reply: any) {
+   try {
+      await request.jwtVerify()
+   } catch (err) {
+      reply.code(401).send({ message: 'Unauthorized' })
+   }
 })
 
 /**
@@ -49,6 +69,7 @@ await app.register(swaggerUi, {
 await app.register(chatRouter)
 await app.register(productRouter)
 await app.register(uploadRouter)
+await app.register(userRouter)
 
 const port = Number(process.env.PORT) || 3000
 
