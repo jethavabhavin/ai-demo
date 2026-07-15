@@ -13,7 +13,7 @@ export const productSchema = {
                      status: { type: 'boolean' },
                      price: { type: 'number' },
                   },
-                  required: ['id', 'name', 'status', 'price'],
+                  required: ['name', 'status', 'price'],
                },
             },
          },
