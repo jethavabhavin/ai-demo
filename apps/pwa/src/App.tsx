@@ -11,6 +11,7 @@ export default function App() {
          </nav>
          <Routes>
             <Route path="/" element={<ChatBoard />} />
+            <Route path="/chatboard" element={<ChatBoard />} />
             <Route path="/upload" element={<Upload />} />
             <Route path="/products" element={<ProductList />} />
          </Routes>
