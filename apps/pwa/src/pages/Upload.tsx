@@ -12,14 +12,6 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 async function uploadImage(file: File) {
-   // const formData = new FormData()
-   // formData.append('image', file)
-
-   // const res = await fetch(env.apiUrl + '/api/upload', {
-   //    method: 'POST',
-   //    body: formData,
-   // })
-
    const base64Image = await fileToBase64(file)
    const res = await fetch(env.apiUrl + '/api/upload', {
       method: 'POST',
@@ -60,12 +52,18 @@ export default function Upload() {
       uploadMutation.mutate(file)
    }
    return (
-      <div>
-         <form encType="multipart/form-data">
-            <label htmlFor="image"> Image </label>
-            <input id="image" type="file" accept="image/*" onChange={onUploaadImage} />
-         </form>
-         <div className="image-preview">{previewImage && <img src={previewImage} alt="Image Preview" />}</div>
+      <div className="mx-auto max-w-2xl p-6">
+         <h2 className="mb-4 text-xl font-semibold text-gray-800">Upload Image</h2>
+         {uploadMutation.isPending && <p>Uploading...</p>}
+         {uploadMutation.isError && <p className="text-red-500">Error: {uploadMutation.error?.message}</p>}
+         {uploadMutation.isSuccess && <p className="text-green-500">Image uploaded successfully!</p>}
+         <div className="image-preview">
+            <form className="space-y-4" encType="multipart/form-data">
+               <label htmlFor="image"> Image </label>
+               <input id="image" type="file" accept="image/png, image/jpeg, image/webp" onChange={onUploaadImage} />
+            </form>
+            {previewImage && <img src={previewImage} alt="Image Preview" />}
+         </div>
       </div>
    )
 }
