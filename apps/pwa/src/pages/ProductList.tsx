@@ -1,4 +1,4 @@
-import { Table, TableBody, TableHeader, TableCell, TableHead, TableRow, TableCaption } from '@/components/ui/table'
+import { Table, TableBody, TableHeader, TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { useProducts } from '@/hooks/products'
 
 export default function ProductList() {
