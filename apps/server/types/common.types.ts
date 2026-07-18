@@ -1,3 +1,4 @@
+import type { ObjectId } from 'mongodb'
 export type Pagination = {
    page: number
    limit: number
@@ -13,7 +14,8 @@ export type PaginatedResponse<T> = {
 }
 
 export interface Product {
-   id: number
+   _id: ObjectId
+   id: string
    name: string
    status: boolean
    price: number

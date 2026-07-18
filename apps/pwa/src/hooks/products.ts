@@ -1,5 +1,13 @@
 // hooks/useProducts.ts
-import { keepPreviousData, useQuery, type UseQueryResult } from '@tanstack/react-query'
+import {
+   keepPreviousData,
+   useMutation,
+   useQuery,
+   useQueryClient,
+   type UseMutateFunction,
+   type UseMutationResult,
+   type UseQueryResult,
+} from '@tanstack/react-query'
 import type Product from '@/type/product'
 import { env } from '@/config/env'
 import { useAuth } from '@/context/AuthContext'
@@ -38,6 +46,21 @@ async function fetchProducts(
    return res.json()
 }
 
+async function deleteProduct(authToken: string, id: string): Promise<PaginatedData<Product>> {
+   const url = `${env.apiUrl}/api/products/${id}`
+   const res = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+         'Content-Type': 'application/json',
+         Authorization: `Bearer ${authToken}`,
+      },
+   })
+   if (!res.ok) {
+      throw new Error('Failed to fetch products')
+   }
+   return res.json()
+}
+
 export function useProducts(
    search: string,
    page: number,
@@ -45,7 +68,7 @@ export function useProducts(
 ): UseQueryResult<PaginatedData<Product>, Error> {
    const { token } = useAuth()
    const queryResult = useQuery({
-      queryKey: ['products', page, limit, search],
+      queryKey: ['products'],
       queryFn: () => fetchProducts(token!, search, page, limit),
       enabled: !!token,
       placeholderData: keepPreviousData,
@@ -55,4 +78,16 @@ export function useProducts(
       data: queryResult.data,
       ...queryResult,
    }
+}
+
+export function useDeleteProduct(): UseMutationResult<void, Error, string> {
+   const { token } = useAuth()
+   const queryClient = useQueryClient()
+   const deleteProduct = useMutation({
+      mutationFn: async (id: string) => deleteProduct(token!, id),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ['products'] })
+      },
+   })
+   return deleteProduct
 }

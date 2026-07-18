@@ -1,9 +1,16 @@
 import { Table, TableBody, TableHeader, TableCell, TableHead, TableRow } from '@/components/ui/table'
-import { useProducts } from '@/hooks/products'
+import { useNavigate } from 'react-router-dom'
+import { useDeleteProduct, useProducts } from '@/hooks/products'
+import { Button } from '@base-ui/react/button'
+import { SquarePen, Trash } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import type Product from '@/type/product'
 
 export default function ProductList() {
+   const navigate = useNavigate()
+   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
    const [searchParams, setSearchParams] = useSearchParams()
 
    const page = Number(searchParams.get('page')) || 1
@@ -27,7 +34,7 @@ export default function ProductList() {
    }, [])
 
    const getStatusLabel = (status: boolean) => (status ? 'Enable' : 'Disabled')
-
+   const deleteProduct = useDeleteProduct()
    const { data, isLoading, isError, isFetching } = useProducts(search, page, limit)
 
    const goToPage = (newPage: number) => {
@@ -59,6 +66,21 @@ export default function ProductList() {
       }, 500)
    }
 
+   const handleEdit = (id: string) => {
+      navigate(`/products/${id}`)
+   }
+
+   const handleConfirmDelete = () => {
+      if (deleteTarget) {
+         deleteProduct.mutate(deleteTarget.id)
+         setDeleteTarget(null)
+      }
+   }
+
+   const handleDeleteClick = (product: Product) => {
+      setDeleteTarget({ id: product.id, name: product.name })
+   }
+
    if (isLoading) return <p>Loading...</p>
    if (isError) return <p>Failed to load products.</p>
 
@@ -80,6 +102,7 @@ export default function ProductList() {
                   <TableHead className="w-[100px]">Name</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Price</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -88,6 +111,14 @@ export default function ProductList() {
                      <TableCell className="font-medium">{product.name}</TableCell>
                      <TableCell>{getStatusLabel(product.status)}</TableCell>
                      <TableCell className="text-right">{product.price}</TableCell>
+                     <TableCell className="text-right">
+                        <Button onClick={() => handleEdit(product.id)}>
+                           <SquarePen className="text-gray-700 w-6 h-6 p-1" />
+                        </Button>
+                        <Button onClick={() => handleDeleteClick(product)}>
+                           <Trash className="text-gray-700 w-6 h-6 p-1" />
+                        </Button>
+                     </TableCell>
                   </TableRow>
                ))}
             </TableBody>
@@ -113,6 +144,16 @@ export default function ProductList() {
                </button>
             </div>
          </div>
+         <ConfirmDialog
+            open={!!deleteTarget}
+            onOpenChange={(open) => !open && setDeleteTarget(null)}
+            title="Delete product"
+            description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+            confirmLabel="Delete"
+            variant="destructive"
+            isLoading={deleteProduct.isPending}
+            onConfirm={handleConfirmDelete}
+         />
       </div>
    )
 }

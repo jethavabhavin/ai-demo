@@ -1,4 +1,9 @@
+import { request } from 'node:http'
+
 export const productSchema = {
+   tags: ['Products'],
+   summary: 'Get All Products',
+   description: 'All Products List Api',
    request: {
       querystring: {
          type: 'object',
@@ -19,7 +24,7 @@ export const productSchema = {
                items: {
                   type: 'object',
                   properties: {
-                     id: { type: 'number' },
+                     id: { type: 'string' },
                      name: { type: 'string' },
                      status: { type: 'boolean' },
                      price: { type: 'number' },
@@ -40,6 +45,30 @@ export const productSchema = {
             },
          },
          required: ['data', 'pagination'],
+      },
+   },
+}
+
+export const deleteProductSchema = {
+   tags: ['Products'],
+   summary: 'Delete Product',
+   description: 'Delete Product API',
+   request: {
+      params: {
+         type: 'object',
+         properties: {
+            id: { type: 'string' },
+         },
+         required: ['id'],
+      },
+   },
+   response: {
+      200: {
+         type: 'object',
+         properties: {
+            success: { type: 'boolean' },
+         },
+         required: ['success'],
       },
    },
 }

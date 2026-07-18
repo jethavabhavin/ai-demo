@@ -1,6 +1,7 @@
 import { number } from 'zod'
 import { getDb } from '../lib/mongodb'
 import type { Product } from '../types/common.types'
+import { ObjectId } from 'mongodb'
 
 const productRepository = {
    async getProducts(search: string, skip: number, limit: number): Promise<{ data: Product[]; total: number }> {
@@ -14,6 +15,17 @@ const productRepository = {
       } catch (e) {
          console.log(e)
          throw new Error('Failed to fetch products from database')
+      }
+   },
+   async delete(id: string) {
+      try {
+         const db = await getDb()
+         const collection = db.collection<Product>('products')
+         const result = await collection.deleteOne({ _id: new ObjectId(id) })
+         return result.deletedCount === 1
+      } catch (e) {
+         console.log(e)
+         throw new Error('Failed to delete product from database')
       }
    },
 }
