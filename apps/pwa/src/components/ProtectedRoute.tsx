@@ -3,7 +3,11 @@ import { useAuth } from '../context/AuthContext'
 import type { ReactNode } from 'react'
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
-   const { isAuthenticated } = useAuth()
+   const { isAuthenticated, isLoading } = useAuth()
+
+   if (isLoading) {
+      return <div className="flex min-h-screen items-center justify-center text-gray-500">Checking session...</div>
+   }
 
    if (!isAuthenticated) {
       return <Navigate to="/login" replace />
