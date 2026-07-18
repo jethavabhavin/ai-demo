@@ -1,5 +1,6 @@
 import { Table, TableBody, TableHeader, TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { useProducts } from '@/hooks/products'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 export default function ProductList() {
@@ -8,6 +9,22 @@ export default function ProductList() {
    const page = Number(searchParams.get('page')) || 1
    const search = searchParams.get('search') || ''
    const limit = 10
+
+   // local state so the input updates instantly on every keystroke
+   const [searchValue, setSearchValue] = useState<string>(search)
+   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+   // keep input in sync if URL changes externally (back/forward, shared link)
+   useEffect(() => {
+      setSearchValue(search)
+   }, [search])
+
+   // clear any pending debounce if the component unmounts mid-typing
+   useEffect(() => {
+      return () => {
+         if (debounceRef.current) clearTimeout(debounceRef.current)
+      }
+   }, [])
 
    const getStatusLabel = (status: boolean) => (status ? 'Enable' : 'Disabled')
 
@@ -22,16 +39,24 @@ export default function ProductList() {
    }
 
    const handleSearchChange = (value: string) => {
-      setSearchParams((prev) => {
-         const params = new URLSearchParams(prev)
-         if (value) {
-            params.set('search', value)
-         } else {
-            params.delete('search')
-         }
-         params.set('page', '1')
-         return params
-      })
+      setSearchValue(value) // instant visual feedback
+
+      if (debounceRef.current) {
+         clearTimeout(debounceRef.current) // cancel the previous pending update
+      }
+
+      debounceRef.current = setTimeout(() => {
+         setSearchParams((prev) => {
+            const params = new URLSearchParams(prev)
+            if (value) {
+               params.set('search', value)
+            } else {
+               params.delete('search')
+            }
+            params.set('page', '1')
+            return params
+         })
+      }, 500)
    }
 
    if (isLoading) return <p>Loading...</p>
@@ -45,7 +70,7 @@ export default function ProductList() {
          <input
             type="text"
             placeholder="Search products..."
-            value={search}
+            value={searchValue}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
          />
