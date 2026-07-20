@@ -46,19 +46,19 @@ async function fetchProducts(
    return res.json()
 }
 
-async function deleteProduct(authToken: string, id: string): Promise<PaginatedData<Product>> {
+async function deleteProduct(authToken: string, id: string): Promise<void> {
    const url = `${env.apiUrl}/api/products/${id}`
    const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-         'Content-Type': 'application/json',
          Authorization: `Bearer ${authToken}`,
       },
    })
    if (!res.ok) {
-      throw new Error('Failed to fetch products')
+      throw new Error('Failed to delete product')
    }
-   return res.json()
+   // No need to parse response body for delete operation
+   return
 }
 
 export function useProducts(
@@ -83,11 +83,11 @@ export function useProducts(
 export function useDeleteProduct(): UseMutationResult<void, Error, string> {
    const { token } = useAuth()
    const queryClient = useQueryClient()
-   const deleteProduct = useMutation({
-      mutationFn: async (id: string) => deleteProduct(token!, id),
+   const deleteProductMutation = useMutation({
+      mutationFn: async (id: string) => await deleteProduct(token!, id),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ['products'] })
       },
    })
-   return deleteProduct
+   return deleteProductMutation
 }

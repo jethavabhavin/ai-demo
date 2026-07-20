@@ -22,6 +22,7 @@ const productRepository = {
          const db = await getDb()
          const collection = db.collection<Product>('products')
          const result = await collection.deleteOne({ _id: new ObjectId(id) })
+         console.log('result', result)
          return result.deletedCount === 1
       } catch (e) {
          console.log(e)

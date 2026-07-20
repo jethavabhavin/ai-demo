@@ -19,7 +19,10 @@ const app = Fastify({
 // Register CORS
 await app.register(cors, {
    origin: true,
-   credentials: false,
+   credentials: true,
+   // Allow Authorization header for JWT auth
+   allowedHeaders: ['Authorization', 'Content-Type'],
+   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 })
 
 /**
