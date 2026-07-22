@@ -10,8 +10,15 @@ import userRouter from './routers/use.router'
 import fastifyJwt from '@fastify/jwt'
 import multipart from '@fastify/multipart'
 import fastifyExpress from '@fastify/express'
+import path from 'path'
+import fs from 'fs'
 
 dotenv.config()
+
+const UPLOAD_DIR = path.join(__dirname, '..', 'uploads')
+if (!fs.existsSync(UPLOAD_DIR)) {
+   fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+}
 
 const app = Fastify({
    logger: true,
