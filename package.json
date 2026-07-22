@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "bun run index.ts",
+    "worker": "bun run apps/server/worker.js",
     "dev": "bun run dev.index.ts",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "prepare": "husky",

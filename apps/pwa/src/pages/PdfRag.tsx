@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { UploadCloud } from 'lucide-react'
+import { env } from '@/config/env'
+import { useAuth } from '@/context/AuthContext'
 
 export default function PDFRag() {
+   const { token } = useAuth()
    const [pdfs, setPdfs] = useState<File[] | null>(null)
    const [uploadStatus, setUploadStatus] = useState<Map<number, string>>()
    const updateUploadStatus = (status: string, index: number) => {
@@ -13,9 +16,12 @@ export default function PDFRag() {
    }
    const uploadPDF = async (formData: FormData, index: number) => {
       try {
-         const res = await fetch('/api/upload-pdf-rag', {
+         const res = await fetch(`${env.apiUrl}/api/upload-pdf-rag`, {
             method: 'POST',
             body: formData,
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
          })
 
          if (!res.ok) {

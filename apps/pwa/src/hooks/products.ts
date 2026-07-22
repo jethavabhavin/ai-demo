@@ -4,7 +4,6 @@ import {
    useMutation,
    useQuery,
    useQueryClient,
-   type UseMutateFunction,
    type UseMutationResult,
    type UseQueryResult,
 } from '@tanstack/react-query'

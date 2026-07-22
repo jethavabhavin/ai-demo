@@ -22,10 +22,11 @@ export const ChatController = {
    },
    async uploadPDFRag(req: any, reply: FastifyReply) {
       const file = req.file
+      console.log('Start pdf upload controller', file)
       if (!file) {
          return reply.status(400).send('No file uploaded.')
       }
-      chatService.pdfRagUpload(file)
+      await chatService.pdfRagUpload(file)
       reply.send({ status: 'File uploaded successfully', file: file })
    },
 }

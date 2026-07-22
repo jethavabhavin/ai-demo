@@ -47,13 +47,14 @@ export const chatService = {
 
    async pdfRagUpload(file: any): Promise<boolean> {
       await queue.add(
-         'pdfrag-ready',
+         'pdf-rag-upload-queue',
          JSON.stringify({
             name: file.originalname,
             path: file.path,
             destination: file.destination,
          }),
       )
+      console.log('Added to queue')
       return false
    },
 }

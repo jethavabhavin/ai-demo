@@ -1,11 +1,11 @@
 import { Worker } from 'bullmq'
 
+console.log(`Worker starting on REDIS_HOST=${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`)
+
 const worker = new Worker(
    'pdf-rag-upload-queue',
    async (job) => {
-      if (job.path) {
-         console.log(job)
-      }
+      console.log('Processing job:', job.id, job.data)
    },
    {
       concurrency: 100,
@@ -15,3 +15,11 @@ const worker = new Worker(
       },
    },
 )
+
+worker.on('ready', () => {
+   console.log('Worker connected and ready to process jobs')
+})
+
+worker.on('error', (err) => {
+   console.error('Worker error:', err)
+})
