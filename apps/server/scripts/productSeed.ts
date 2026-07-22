@@ -114,13 +114,17 @@ async function seed() {
    const client = new MongoClient(uri)
    try {
       await client.connect()
-      const db = client.db('productCollection')
+      const dbName = process.env.DB_NAME
+      const db = client.db(dbName)
       const collection = db.collection('products')
-      await collection.deleteMany({})
-      console.log('Cleared existing products')
-
-      const result = await collection.insertMany(initialProducts)
-      console.log(`Inserted ${result.insertedCount} products`)
+      await db.collection('products').createIndex({ name: 1 })
+      const count = await collection.countDocuments()
+      if (count > 0) {
+         console.log(`Products already exist. Skipping seed.`)
+         return
+      }
+      await collection.insertMany(initialProducts)
+      console.log(`Inserted ${initialProducts.length} products`)
    } catch (err) {
       console.error('Seed failed:', err)
    } finally {

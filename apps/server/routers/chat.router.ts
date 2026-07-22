@@ -41,6 +41,11 @@ class ChatRouter {
          { preHandler: upload.single('pdf'), schema: { response: uploadPdfRagSchema.response } },
          ChatController.uploadPDFRag,
       )
+      this.fastify.post(
+         '/api/pdfchat',
+         { preHandler: this.fastify.authenticate, schema: chatSchema },
+         ChatController.sendPDfMessage,
+      )
    }
 }
 

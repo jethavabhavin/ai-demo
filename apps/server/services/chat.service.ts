@@ -1,10 +1,16 @@
 import OpenAI from 'openai'
 import { conversationRepository } from '../repositories/conversition.repositor'
+import { Queue } from 'bullmq'
 
+const queue = new Queue('pdf-rag-upload-queue', {
+   connection: {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: Number(process.env.REDIS_PORT) || 6379,
+   },
+})
 // const openai = new OpenAI({
 //    apiKey: process.env.OPENAI_API_KEY,
 // })
-// 1. Configure the disk storage engine
 
 const openai = new OpenAI({
    baseURL: 'https://zenmux.ai/api/v1',
@@ -37,5 +43,17 @@ export const chatService = {
       console.log(response.choices[0]?.message.content)
       conversationRepository.setLastResponseId(convId, response.id)
       return { id: response.id, message: 'response.choices[0]?.message.content' }
+   },
+
+   async pdfRagUpload(file: any): Promise<boolean> {
+      await queue.add(
+         'pdfrag-ready',
+         JSON.stringify({
+            name: file.originalname,
+            path: file.path,
+            destination: file.destination,
+         }),
+      )
+      return false
    },
 }

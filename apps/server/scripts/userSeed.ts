@@ -5,16 +5,24 @@ import bcrypt from 'bcrypt'
 
 dotenv.config()
 
-const uri = process.env.MONGODB_URI as string
-const dbName = process.env.DB_NAME as string
+const uri = process.env.MONGODB_URI
+const dbName = process.env.DB_NAME
 
 async function seed() {
+   if (!uri || !dbName) {
+      throw new Error('MONGODB_URI or DB_NAME is not defined.')
+   }
    const client = new MongoClient(uri)
    try {
       await client.connect()
       const db = client.db(dbName)
       const collection = db.collection('users')
-
+      await db.collection('users').createIndex({ email: 1 })
+      const count = await collection.countDocuments()
+      if (count > 0) {
+         console.log(`Users already exist. Skipping seed.`)
+         return
+      }
       await collection.deleteMany({})
       console.log('Cleared existing users')
 
