@@ -8,6 +8,8 @@ import productRouter from './routers/product.router'
 import uploadRouter from './routers/upload.router'
 import userRouter from './routers/use.router'
 import fastifyJwt from '@fastify/jwt'
+import multipart from '@fastify/multipart'
+import fastifyExpress from '@fastify/express'
 
 dotenv.config()
 
@@ -16,7 +18,12 @@ const app = Fastify({
    bodyLimit: 10 * 1024 * 1024, // 10mb limit
 })
 
-// Register CORS
+// 1. Register the Express compatibility plugin
+await app.register(fastifyExpress)
+
+// Register multipart to handle file uploads
+await app.register(multipart)
+
 await app.register(cors, {
    origin: true,
    credentials: true,
@@ -83,7 +90,7 @@ await app.register(productRouter)
 await app.register(uploadRouter)
 await app.register(userRouter)
 
-const port = Number(process.env.PORT) || 3000
+const port = Number(process.env.PORT) || 3002
 
 try {
    await app.listen({ port, host: '0.0.0.0' })

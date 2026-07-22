@@ -24,6 +24,7 @@
     "apps/*"
   ],
   "dependencies": {
+    "@fastify/multipart": "^10.1.0",
     "@types/cors": "^2.8.19"
   }
 }

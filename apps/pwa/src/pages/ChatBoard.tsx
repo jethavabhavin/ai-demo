@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { SendHorizonal } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { DownloadCloud, FileText, Plus, SendHorizonal } from 'lucide-react'
 
 import { ChatMessage } from '@/components/ui/chat-message'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,7 +14,9 @@ interface Message {
 }
 
 export default function ChatBoard() {
+   const fileInputRef = useRef<HTMLInputElement>(null)
    const [messages, setMessages] = useState<Message[]>([])
+   const [inputOpen, setInputOpen] = useState<boolean>(false)
    const [prompt, setPrompt] = useState('')
    const [loading, setLoading] = useState(false)
 
@@ -68,7 +70,19 @@ export default function ChatBoard() {
          setLoading(false)
       }
    }
-
+   const openInputContextHandler = () => {
+      setInputOpen((state) => !state)
+   }
+   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (file) {
+      }
+   }
+   const documentHandler = () => {
+      if (fileInputRef.current) {
+         fileInputRef.current.click()
+      }
+   }
    return (
       <main className="flex h-screen items-center justify-center bg-muted/40 p-6">
          <Card className="flex h-[90vh] w-full max-w-5xl flex-col">
@@ -99,10 +113,29 @@ export default function ChatBoard() {
 
             <CardFooter className="border-t">
                <div className="flex w-full gap-3">
+                  <div className="relative h-full w-12 ">
+                     {inputOpen && (
+                        <div className="flex gap-2 absolute bottom-10 bg-gray-100 border-2 p-2 rounded">
+                           <Button className="relative" variant="outline" size="icon-lg" onClick={documentHandler}>
+                              <input
+                                 type="file"
+                                 className="hidden"
+                                 accept=".pdf"
+                                 onChange={handleFileChange}
+                                 ref={fileInputRef}
+                              />
+                              <FileText className="h-6 w-6" />
+                           </Button>
+                        </div>
+                     )}
+                     <Button variant="outline" className="rounded-xl" size="icon-lg" onClick={openInputContextHandler}>
+                        <Plus className="h-6 w-6" />
+                     </Button>
+                  </div>
                   <Textarea
                      value={prompt}
                      placeholder="Message AI..."
-                     className="min-h-[60px] resize-none"
+                     className="min-h-18 resize-none"
                      onChange={(e) => setPrompt(e.target.value)}
                      onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
@@ -111,7 +144,6 @@ export default function ChatBoard() {
                         }
                      }}
                   />
-
                   <Button size="icon" disabled={loading} onClick={sendMessage}>
                      <SendHorizonal className="h-5 w-5" />
                   </Button>

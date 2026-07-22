@@ -11,4 +11,11 @@ export const ChatController = {
          reply.status(500).send({ error: 'Failed to generate response.' })
       }
    },
+   async uploadPDFRag(req: any, reply: FastifyReply) {
+      const file = req.file
+      if (!file) {
+         return reply.status(400).send('No file uploaded.')
+      }
+      reply.send({ status: 'File uploaded successfully', file: file })
+   },
 }

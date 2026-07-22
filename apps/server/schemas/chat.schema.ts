@@ -23,3 +23,20 @@ export const chatSchema = {
       },
    },
 }
+
+export const uploadPdfRagSchema = {
+   // Updated: multipart upload handled by multer; body validation relaxed
+   body: {
+      type: 'object',
+      additionalProperties: true,
+   },
+   response: {
+      200: {
+         type: 'object',
+         properties: {
+            message: { type: 'string' },
+            success: { type: 'boolean' },
+         },
+      },
+   },
+}

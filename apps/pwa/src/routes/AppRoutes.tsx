@@ -3,6 +3,7 @@ import { Routes, Route, Link, Navigate } from 'react-router-dom'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import Login from '@/pages/Login'
 import ChatBoard from '@/pages/ChatBoard'
+import PdfRag from '@/pages/PdfRag'
 import Upload from '@/pages/Upload'
 import ProductList from '@/pages/ProductList'
 
@@ -17,6 +18,9 @@ export default function AppRoutes() {
             </Link>
             <Link to="/chatboard" className="hover:text-blue-600">
                Chat Board
+            </Link>
+            <Link to="/pdf-rag" className="hover:text-blue-600">
+               PDF Rag
             </Link>
             <Link to="/upload" className="hover:text-blue-600">
                Upload
@@ -52,6 +56,14 @@ export default function AppRoutes() {
                element={
                   <ProtectedRoute>
                      <ChatBoard />
+                  </ProtectedRoute>
+               }
+            />
+            <Route
+               path="/pdf-rag"
+               element={
+                  <ProtectedRoute>
+                     <PdfRag />
                   </ProtectedRoute>
                }
             />
