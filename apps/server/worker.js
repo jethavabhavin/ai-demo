@@ -3,6 +3,7 @@ import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf'
 import dotenv from 'dotenv'
 import path from 'path'
 import { getVectorStore } from './lib/vectorStore'
+import pdfRepository from './repositories/pdf.repository'
 
 dotenv.config({ path: path.resolve(__dirname, '.env') })
 dotenv.config()
@@ -10,9 +11,9 @@ dotenv.config()
 const vectorStore = await getVectorStore()
 
 console.log(`Worker starting on REDIS_HOST=${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`)
-const BATCH_SIZE = 1 // still limited by Gemini's rate limit, not Qdrant
-const MAX_RETRIES = 2
-const BASE_DELAY_MS = 5000
+const BATCH_SIZE = process.env.WORKER_BATCH_SIZE || 10 // limited by Gemini's rate limit
+const MAX_RETRIES = process.env.WORKER_MAX_RETRIES || 2
+const BASE_DELAY_MS = process.env.WORKER_BASE_DELAY_MS || 5000
 
 function sleep(ms) {
    return new Promise((resolve) => setTimeout(resolve, ms))
@@ -48,7 +49,7 @@ async function embedAndUpsertInBatches(vectorStore, docs) {
       const ok = await upsertBatchWithRetry(vectorStore, batch, label)
       if (!ok) failedDocs.push(...batch)
 
-      await sleep(1500) // pacing is only needed because of Gemini, not Qdrant
+      await sleep(1500) // pacing for Gemini rate limit
    }
 
    return failedDocs
@@ -58,8 +59,8 @@ const worker = new Worker(
    'pdf-rag-upload-queue',
    async (job) => {
       console.log('Processing job:', job.id, job.data)
+      const data = typeof job.data === 'string' ? JSON.parse(job.data) : job.data
       try {
-         const data = typeof job.data === 'string' ? JSON.parse(job.data) : job.data
          const filePath = path.resolve(__dirname, data?.path)
          if (!filePath) {
             throw new Error(`Job ${job.id} does not contain a valid file path.`)
@@ -69,11 +70,33 @@ const worker = new Worker(
          const docs = await loader.load()
          console.log(`Loaded ${docs.length} document chunk(s).`)
 
-         await embedAndUpsertInBatches(vectorStore, docs)
+         // Enrich chunk metadata with userId, pdfId, and filename
+         docs.forEach((doc) => {
+            doc.metadata = {
+               ...doc.metadata,
+               userId: data.userId || '',
+               pdfId: data.pdfId || '',
+               source: data.name || data.filename,
+               filename: data.filename,
+            }
+         })
+
+         const failedDocs = await embedAndUpsertInBatches(vectorStore, docs)
+
+         if (failedDocs.length > 0) {
+            console.warn(`Job ${job.id}: ${failedDocs.length} chunks failed to insert into Qdrant.`)
+         }
+
+         if (data.pdfId) {
+            await pdfRepository.updatePdfStatus(data.pdfId, 'Success')
+         }
 
          console.log(`Indexed PDF into Qdrant collection 'pdf-rag' for job ${job.id}`)
       } catch (e) {
          console.error('Error processing job:', e)
+         if (data?.pdfId) {
+            await pdfRepository.updatePdfStatus(data.pdfId, 'Failed Upload').catch(() => {})
+         }
          throw e
       }
    },

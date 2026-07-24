@@ -1,10 +1,10 @@
 import type { FastifyInstance } from 'fastify'
 import { ChatController } from '../controllers/chat.controller'
-import { uploadPdfRagSchema, chatSchema } from '../schemas/chat.schema'
+import { uploadPdfRagSchema, chatSchema, getUserPdfsSchema } from '../schemas/chat.schema'
 import multer from 'fastify-multer'
 import path from 'path'
 
-// 2. Define standard Multer storage
+// Define standard Multer storage
 const storage = multer.diskStorage({
    destination: (req, file, cb) => cb(null, 'uploads/pdf'),
    filename: (req, file, cb) => {
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 
 const ALLOWED_MIME_TYPES = ['application/pdf']
 
-// 2. Initialize the multer instance with storage configurations
+// Initialize the multer instance with storage configurations
 const upload = multer({
    storage: storage,
    limits: { fileSize: 100 * 1024 * 1024 }, // Limit file size to 100MB
@@ -36,15 +36,26 @@ class ChatRouter {
          { preHandler: this.fastify.authenticate, schema: chatSchema },
          ChatController.sendMessage,
       )
+
       this.fastify.post(
          '/api/upload-pdf-rag',
-         { preHandler: upload.single('pdf'), schema: { response: uploadPdfRagSchema.response } },
+         {
+            preHandler: [this.fastify.authenticate, upload.single('pdf')],
+            schema: { response: uploadPdfRagSchema.response },
+         },
          ChatController.uploadPDFRag,
       )
+
       this.fastify.post(
          '/api/pdfchat',
          { preHandler: this.fastify.authenticate, schema: chatSchema },
          ChatController.sendPDfMessage,
+      )
+
+      this.fastify.get(
+         '/api/user-pdfs',
+         { preHandler: this.fastify.authenticate, schema: getUserPdfsSchema },
+         ChatController.getUserPdfs,
       )
    }
 }

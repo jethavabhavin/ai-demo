@@ -1,6 +1,5 @@
-import { number } from 'zod'
 import { getDb } from '../lib/mongodb'
-import type { Product } from '../types/common.types'
+import type { Product } from '../types/product.types'
 import { ObjectId } from 'mongodb'
 
 const productRepository = {

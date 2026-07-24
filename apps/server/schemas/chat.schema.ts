@@ -23,6 +23,16 @@ export const chatSchema = {
                properties: {
                   id: { type: 'string' },
                   message: { type: 'string' },
+                  references: {
+                     type: 'array',
+                     items: {
+                        type: 'object',
+                        properties: {
+                           name: { type: 'string' },
+                           url: { type: 'string' },
+                        },
+                     },
+                  },
                },
             },
          },
@@ -31,7 +41,6 @@ export const chatSchema = {
 }
 
 export const uploadPdfRagSchema = {
-   // Updated: multipart upload handled by multer; body validation relaxed
    body: {
       type: 'object',
       additionalProperties: true,
@@ -42,6 +51,33 @@ export const uploadPdfRagSchema = {
          properties: {
             message: { type: 'string' },
             success: { type: 'boolean' },
+         },
+      },
+   },
+}
+
+export const getUserPdfsSchema = {
+   response: {
+      200: {
+         type: 'object',
+         properties: {
+            pdfs: {
+               type: 'array',
+               items: {
+                  type: 'object',
+                  properties: {
+                     _id: { type: 'string' },
+                     userId: { type: 'string' },
+                     originalName: { type: 'string' },
+                     filename: { type: 'string' },
+                     path: { type: 'string' },
+                     size: { type: 'number' },
+                     status: { type: 'string' },
+                     url: { type: 'string' },
+                     createdAt: { type: 'string' },
+                  },
+               },
+            },
          },
       },
    },

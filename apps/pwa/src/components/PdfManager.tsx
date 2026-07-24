@@ -1,15 +1,20 @@
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, FileCode } from 'lucide-react'
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, FileCode, Download, RotateCcw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { env } from '@/config/env'
+import type { UserPdfItem } from '@/type/pdf'
+
+export type { UserPdfItem }
 
 interface PdfManagerProps {
-   pdfs: File[] | null
-   uploadStatus?: Map<number, string>
+   pdfs: UserPdfItem[] | null
+   uploadStatus?: Map<string | number, string>
    onUploadPDF: () => void
+   onRetryUpload?: (pdf: UserPdfItem) => void
    className?: string
 }
 
-export function PdfManager({ pdfs, uploadStatus, onUploadPDF, className }: PdfManagerProps) {
+export function PdfManager({ pdfs, uploadStatus, onUploadPDF, onRetryUpload, className }: PdfManagerProps) {
    return (
       <Card className={`flex flex-col h-full overflow-hidden shadow-sm border ${className ?? ''}`}>
          <CardHeader className="border-b py-3 px-6">
@@ -54,7 +59,10 @@ export function PdfManager({ pdfs, uploadStatus, onUploadPDF, className }: PdfMa
                   ) : (
                      <div className="space-y-2">
                         {pdfs.map((pdf, idx) => {
-                           const status = uploadStatus?.get(idx) ?? 'Pending'
+                           const status =
+                              uploadStatus?.get(pdf.name) ?? uploadStatus?.get(idx) ?? pdf.status ?? 'Success'
+                           const isFailed = status === 'Failed Upload' || status === 'Failed'
+
                            return (
                               <div
                                  key={idx}
@@ -70,24 +78,56 @@ export function PdfManager({ pdfs, uploadStatus, onUploadPDF, className }: PdfMa
                                     </div>
                                  </div>
 
-                                 <div className="shrink-0 ml-2">
+                                 <div className="flex items-center gap-2 shrink-0 ml-2">
                                     {status === 'Uploading...' && (
                                        <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full border border-blue-200">
                                           <Loader2 className="h-3 w-3 animate-spin" />
-                                          Uploading
+                                          Uploading...
                                        </span>
                                     )}
-                                    {status === 'Success' && (
+
+                                    {status === 'Initializing...' && (
+                                       <span className="inline-flex items-center gap-1 text-xs font-medium text-purple-600 bg-purple-50 dark:bg-purple-950/50 px-2.5 py-1 rounded-full border border-purple-200">
+                                          <Loader2 className="h-3 w-3 animate-spin" />
+                                          Initializing...
+                                       </span>
+                                    )}
+
+                                    {(status === 'Success' || status === 'Indexed') && (
                                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-full border border-emerald-200">
                                           <CheckCircle2 className="h-3 w-3" />
-                                          Indexed
+                                          Success
                                        </span>
                                     )}
-                                    {status === 'Failed' && (
-                                       <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 dark:bg-red-950/50 px-2.5 py-1 rounded-full border border-red-200">
-                                          <AlertCircle className="h-3 w-3" />
-                                          Failed
-                                       </span>
+
+                                    {isFailed && (
+                                       <div className="flex items-center gap-1.5">
+                                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 dark:bg-red-950/50 px-2.5 py-1 rounded-full border border-red-200">
+                                             <AlertCircle className="h-3 w-3" />
+                                             Failed Upload
+                                          </span>
+                                          <button
+                                             onClick={() => (onRetryUpload ? onRetryUpload(pdf) : onUploadPDF())}
+                                             title="Retry Upload"
+                                             className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700 bg-red-100 hover:bg-red-200 px-2 py-1 rounded-md transition-colors"
+                                          >
+                                             <RotateCcw className="h-3 w-3" />
+                                             Retry
+                                          </button>
+                                       </div>
+                                    )}
+
+                                    {pdf.url && !isFailed && (
+                                       <a
+                                          href={pdf.url.startsWith('http') ? pdf.url : `${env.apiUrl}${pdf.url}`}
+                                          download={pdf.name}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          title="Download PDF"
+                                          className="p-1 text-muted-foreground hover:text-primary transition-colors rounded hover:bg-muted"
+                                       >
+                                          <Download className="h-4 w-4" />
+                                       </a>
                                     )}
                                  </div>
                               </div>

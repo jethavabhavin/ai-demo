@@ -7,7 +7,7 @@
       "start": "bun run index.ts",
       "dev": "bun run --watch index.ts",
       "worker": "bun run worker.js",
-      "seed": "bun run scripts/userSeed.ts && bun run scripts/productSeed.ts && bun run scripts/imageSeed.ts",
+      "seed": "bun run scripts/userSeed.ts && bun run scripts/productSeed.ts && bun run scripts/imageSeed.ts && bun run scripts/pdfSeed.ts",
       "build": "bun build ./index.ts --target=node --outdir=dist"
    },
    "devDependencies": {

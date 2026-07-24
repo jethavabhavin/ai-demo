@@ -1,117 +1,11 @@
-import { useState } from 'react'
-import { env } from '@/config/env'
-import { useAuth } from '@/context/AuthContext'
-import { ChatContainer, type Message } from '@/components/ChatContainer'
+import { ChatContainer } from '@/components/ChatContainer'
 import { PdfManager } from '@/components/PdfManager'
+import { usePdfRag } from '@/hooks/pdfs'
 
 export default function PDFRag() {
-   const { token } = useAuth()
-   const [pdfs, setPdfs] = useState<File[] | null>(null)
-   const [uploadStatus, setUploadStatus] = useState<Map<number, string>>(new Map())
-   const [messages, setMessages] = useState<Message[]>([])
-   const [prompt, setPrompt] = useState('')
-   const [loading, setLoading] = useState(false)
-   const [convId] = useState(() => crypto.randomUUID())
+   const { pdfs, uploadStatus, messages, prompt, setPrompt, isChatLoading, sendMessage, triggerFilePicker } =
+      usePdfRag()
 
-   const sendMessage = async () => {
-      if (!prompt.trim() || loading) return
-
-      const userMessage: Message = {
-         id: crypto.randomUUID(),
-         role: 'user',
-         message: prompt,
-      }
-
-      setMessages((prev) => [...prev, userMessage])
-      setPrompt('')
-      setLoading(true)
-
-      try {
-         const res = await fetch('/api/pdfchat', {
-            method: 'POST',
-            headers: {
-               Authorization: `Bearer ${token}`,
-               'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-               convId,
-               prompt: userMessage.message,
-            }),
-         })
-
-         const data = await res.json()
-
-         setMessages((prev) => [
-            ...prev,
-            {
-               id: data.message.id,
-               role: 'assistant',
-               message: data.message?.message ?? data.message ?? 'No response received.',
-            },
-         ])
-      } catch {
-         setMessages((prev) => [
-            ...prev,
-            {
-               id: crypto.randomUUID(),
-               role: 'assistant',
-               message: 'Something went wrong while processing your request.',
-            },
-         ])
-      } finally {
-         setLoading(false)
-      }
-   }
-
-   const updateUploadStatus = (status: string, index: number) => {
-      setUploadStatus((prev) => {
-         const next = new Map(prev)
-         next.set(index, status)
-         return next
-      })
-   }
-
-   const uploadPDF = async (formData: FormData, index: number) => {
-      try {
-         const res = await fetch(`${env.apiUrl}/api/upload-pdf-rag`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-               Authorization: `Bearer ${token}`,
-            },
-         })
-
-         if (!res.ok) {
-            const errorBody = await res.json().catch(() => ({}))
-            console.error('Upload failed:', res.status, errorBody)
-            updateUploadStatus('Failed', index)
-            return
-         }
-
-         updateUploadStatus('Success', index)
-      } catch (err) {
-         updateUploadStatus('Failed', index)
-      }
-   }
-
-   const pdfUploadHandler = () => {
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = '.pdf'
-      input.addEventListener('change', async (e: Event) => {
-         const target = e.target as HTMLInputElement
-         const file = target?.files?.[0]
-         if (file) {
-            const idx = pdfs?.length || 0
-            setPdfs((prev) => (prev ? [...prev, file] : [file]))
-            updateUploadStatus('Uploading...', idx)
-            const formData = new FormData()
-            formData.append('pdf', file)
-            await uploadPDF(formData, idx)
-         }
-      })
-      input.click()
-   }
    return (
       <div className="min-h-screen bg-muted/30 p-4 md:p-6 lg:p-8 flex flex-col items-center">
          <div className="w-full max-w-7xl flex flex-col gap-6">
@@ -134,7 +28,8 @@ export default function PDFRag() {
                   className="lg:col-span-5"
                   pdfs={pdfs}
                   uploadStatus={uploadStatus}
-                  onUploadPDF={pdfUploadHandler}
+                  onUploadPDF={triggerFilePicker}
+                  onRetryUpload={triggerFilePicker}
                />
 
                {/* Right Column: Chat Assistant */}
@@ -143,7 +38,7 @@ export default function PDFRag() {
                      title="🤖 PDF RAG Assistant"
                      className="h-full w-full shadow-sm border"
                      messages={messages}
-                     loading={loading}
+                     loading={isChatLoading}
                      prompt={prompt}
                      onPromptChange={setPrompt}
                      onSendMessage={sendMessage}

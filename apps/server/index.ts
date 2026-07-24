@@ -12,26 +12,47 @@ import multipart from '@fastify/multipart'
 import fastifyExpress from '@fastify/express'
 import path from 'path'
 import fs from 'fs'
+import process from 'process'
 
 dotenv.config()
 
-const UPLOAD_DIR = path.join(__dirname, '..', 'uploads')
+const UPLOAD_DIR = path.join(__dirname, 'uploads')
 if (!fs.existsSync(UPLOAD_DIR)) {
    fs.mkdirSync(UPLOAD_DIR, { recursive: true })
 }
 
 const app = Fastify({
    logger: true,
-   bodyLimit: 100 * 1024 * 1024, // 100MB limit
+   bodyLimit: Number(process.env.UPLOAD_LIMIT) * 1024 * 1024,
 })
 
 // 1. Register the Express compatibility plugin
 await app.register(fastifyExpress)
 
+// Serve static files under /uploads
+app.get('/uploads/*', async (request, reply) => {
+   const relativePath = (request.params as any)['*']
+   const filePath = path.join(UPLOAD_DIR, relativePath)
+   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      const ext = path.extname(filePath).toLowerCase()
+      const mimeTypes: Record<string, string> = {
+         '.pdf': 'application/pdf',
+         '.png': 'image/png',
+         '.jpg': 'image/jpeg',
+         '.jpeg': 'image/jpeg',
+         '.webp': 'image/webp',
+      }
+      const contentType = mimeTypes[ext] || 'application/octet-stream'
+      reply.header('Content-Disposition', `inline; filename="${path.basename(filePath)}"`)
+      return reply.type(contentType).send(fs.createReadStream(filePath))
+   }
+   return reply.code(404).send({ message: 'File not found' })
+})
+
 // Register multipart to handle file uploads
 await app.register(multipart, {
    limits: {
-      fileSize: 100 * 1024 * 1024, // 100MB limit
+      fileSize: Number(process.env.UPLOAD_LIMIT) * 1024 * 1024,
    },
 })
 
@@ -42,7 +63,7 @@ app.setErrorHandler((error: any, request, reply) => {
          statusCode: 413,
          code: error.code,
          error: 'Payload Too Large',
-         message: 'File size exceeds the maximum allowed limit (100MB).',
+         message: `File size exceeds the maximum allowed limit (${process.env.UPLOAD_LIMIT}MB).`,
       })
    }
    reply.send(error)

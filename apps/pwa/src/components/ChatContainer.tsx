@@ -6,12 +6,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import type { Message } from '@/type/chat'
 
-export interface Message {
-   id: string
-   role: 'user' | 'assistant'
-   message: string
-}
+export type { Message }
 
 interface ChatContainerProps {
    title?: string
@@ -76,7 +73,7 @@ export function ChatContainer({
                   )}
 
                   {messages.map((msg) => (
-                     <ChatMessage key={msg.id} role={msg.role} message={msg.message} />
+                     <ChatMessage key={msg.id} role={msg.role} message={msg.message} references={msg.references} />
                   ))}
 
                   {loading && <ChatMessage role="assistant" message="Thinking..." />}

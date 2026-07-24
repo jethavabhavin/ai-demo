@@ -1,12 +1,7 @@
 import { getDb } from '../lib/mongodb'
+import type { User } from '../types/user.types'
 
-export interface User {
-   _id: string
-   email: string
-   name: string
-   passwordHash: string
-   status: boolean
-}
+export type { User }
 
 const userRepository = {
    async getUserByEmail(email: string): Promise<User | null> {
