@@ -6,6 +6,16 @@ Built with a high-performance **Bun Workspace Monorepo**, Fastify backend, React
 
 ---
 
+## 📸 Screenshots & User Interface
+
+### 📚 PDF Knowledge Base RAG Interface
+![PDF Knowledge Base RAG Preview](docs/images/pdf_rag_preview.png)
+
+### 🤖 AI Chat Board Interface
+![AI Chat Board Preview](docs/images/chatboard_preview.png)
+
+---
+
 ## 🌟 Key Features
 
 ### 📚 1. PDF Knowledge Base RAG
@@ -48,6 +58,11 @@ Built with a high-performance **Bun Workspace Monorepo**, Fastify backend, React
 
 ```
 ai-demo/
+├── docs/
+│   └── images/                # Application preview screenshots
+│       ├── pdf_rag_preview.png
+│       └── chatboard_preview.png
+│
 ├── apps/
 │   ├── pwa/                   # React PWA Frontend
 │   │   ├── src/
@@ -166,6 +181,7 @@ docker compose up --build
 | `POST` | `/api/user/login` | Public | Authenticate user & get JWT token |
 | `GET` | `/api/user-pdfs` | JWT Auth | Get uploaded PDFs owned by current user |
 | `POST` | `/api/upload-pdf-rag` | JWT Auth | Upload PDF for background vector indexing |
+| `DELETE` | `/api/user-pdfs/:id` | JWT Auth | Delete PDF document & clean up Qdrant vectors |
 | `POST` | `/api/pdfchat` | JWT Auth | Perform user-isolated PDF RAG query |
 | `POST` | `/api/chat` | JWT Auth | Perform general AI chat query |
 | `GET` | `/uploads/*` | Public | Download uploaded PDF reference documents |
