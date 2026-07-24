@@ -82,3 +82,22 @@ export const getUserPdfsSchema = {
       },
    },
 }
+
+export const deleteUserPdfSchema = {
+   params: {
+      type: 'object',
+      required: ['id'],
+      properties: {
+         id: { type: 'string' },
+      },
+   },
+   response: {
+      200: {
+         type: 'object',
+         properties: {
+            message: { type: 'string' },
+            success: { type: 'boolean' },
+         },
+      },
+   },
+}

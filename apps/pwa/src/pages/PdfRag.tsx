@@ -3,8 +3,17 @@ import { PdfManager } from '@/components/PdfManager'
 import { usePdfRag } from '@/hooks/pdfs'
 
 export default function PDFRag() {
-   const { pdfs, uploadStatus, messages, prompt, setPrompt, isChatLoading, sendMessage, triggerFilePicker } =
-      usePdfRag()
+   const {
+      pdfs,
+      uploadStatus,
+      messages,
+      prompt,
+      setPrompt,
+      isChatLoading,
+      sendMessage,
+      triggerFilePicker,
+      handleDeletePdf,
+   } = usePdfRag()
 
    return (
       <div className="min-h-screen bg-muted/30 p-4 md:p-6 lg:p-8 flex flex-col items-center">
@@ -30,6 +39,7 @@ export default function PDFRag() {
                   uploadStatus={uploadStatus}
                   onUploadPDF={triggerFilePicker}
                   onRetryUpload={triggerFilePicker}
+                  onDeletePDF={handleDeletePdf}
                />
 
                {/* Right Column: Chat Assistant */}

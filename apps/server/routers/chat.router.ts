@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { ChatController } from '../controllers/chat.controller'
-import { uploadPdfRagSchema, chatSchema, getUserPdfsSchema } from '../schemas/chat.schema'
+import { uploadPdfRagSchema, chatSchema, getUserPdfsSchema, deleteUserPdfSchema } from '../schemas/chat.schema'
 import multer from 'fastify-multer'
 import path from 'path'
 
@@ -56,6 +56,12 @@ class ChatRouter {
          '/api/user-pdfs',
          { preHandler: this.fastify.authenticate, schema: getUserPdfsSchema },
          ChatController.getUserPdfs,
+      )
+
+      this.fastify.delete(
+         '/api/user-pdfs/:id',
+         { preHandler: this.fastify.authenticate, schema: deleteUserPdfSchema },
+         ChatController.deleteUserPdf,
       )
    }
 }

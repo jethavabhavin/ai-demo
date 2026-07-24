@@ -42,6 +42,20 @@ export async function uploadPdfFile(authToken: string, file: File): Promise<bool
    return true
 }
 
+export async function deletePdfFile(authToken: string, id: string): Promise<boolean> {
+   const res = await fetch(`${env.apiUrl}/api/user-pdfs/${id}`, {
+      method: 'DELETE',
+      headers: {
+         Authorization: `Bearer ${authToken}`,
+      },
+   })
+
+   if (!res.ok) {
+      throw new Error('Failed to delete PDF')
+   }
+   return true
+}
+
 export async function sendPdfChatMessage(authToken: string, convId: string, prompt: string): Promise<PdfChatResponse> {
    const res = await fetch(`${env.apiUrl}/api/pdfchat`, {
       method: 'POST',
@@ -94,6 +108,21 @@ export function useUploadPdf(): UseMutationResult<boolean, Error, File> {
 }
 
 /**
+ * Custom hook for PDF document deletion mutation.
+ */
+export function useDeletePdf(): UseMutationResult<boolean, Error, string> {
+   const { token } = useAuth()
+   const queryClient = useQueryClient()
+
+   return useMutation({
+      mutationFn: (id: string) => deletePdfFile(token!, id),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ['user-pdfs'] })
+      },
+   })
+}
+
+/**
  * Custom hook for PDF RAG chat interaction.
  */
 export function usePdfChat(): UseMutationResult<PdfChatResponse, Error, { convId: string; prompt: string }> {
@@ -116,6 +145,7 @@ export function usePdfRag() {
 
    const { data: pdfs = null, isLoading: isPdfsLoading, refetch: refetchPdfs } = useUserPdfs()
    const uploadMutation = useUploadPdf()
+   const deleteMutation = useDeletePdf()
    const chatMutation = usePdfChat()
 
    const updateUploadStatus = useCallback((status: string, key: string | number) => {
@@ -141,6 +171,18 @@ export function usePdfRag() {
          }
       },
       [uploadMutation, updateUploadStatus, queryClient],
+   )
+
+   const handleDeletePdf = useCallback(
+      async (pdf: UserPdfItem) => {
+         if (!pdf._id) return
+         try {
+            await deleteMutation.mutateAsync(pdf._id)
+         } catch (err) {
+            console.error('Failed to delete PDF:', err)
+         }
+      },
+      [deleteMutation],
    )
 
    const triggerFilePicker = useCallback(() => {
@@ -203,9 +245,11 @@ export function usePdfRag() {
       setPrompt,
       isChatLoading: chatMutation.isPending,
       isUploading: uploadMutation.isPending,
+      isDeleting: deleteMutation.isPending,
       sendMessage: handleSendMessage,
       triggerFilePicker,
       handleUploadPdf,
+      handleDeletePdf,
       refetchPdfs,
    }
 }

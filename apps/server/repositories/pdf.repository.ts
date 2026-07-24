@@ -44,6 +44,21 @@ const pdfRepository = {
       if (!pdf) return null
       return { ...pdf, _id: pdf._id?.toString() }
    },
+
+   async deletePdf(id: string, userId: string): Promise<PdfDocument | null> {
+      const db = await getDb()
+      let filter: any = { userId }
+      try {
+         filter._id = new ObjectId(id)
+      } catch {
+         filter._id = id
+      }
+      const pdf = await db.collection<PdfDocument>('pdf_documents').findOne(filter)
+      if (!pdf) return null
+
+      await db.collection('pdf_documents').deleteOne(filter)
+      return { ...pdf, _id: pdf._id?.toString() }
+   },
 }
 
 export default pdfRepository

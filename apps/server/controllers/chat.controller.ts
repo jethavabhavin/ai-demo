@@ -50,4 +50,16 @@ export const ChatController = {
          reply.status(500).send({ error: 'Failed to fetch user PDFs.' })
       }
    },
+
+   async deleteUserPdf(req: FastifyRequest, reply: FastifyReply) {
+      const { id } = req.params as { id: string }
+      const userId = getUserId(req)
+      try {
+         await chatService.deleteUserPdf(id, userId)
+         reply.send({ message: 'PDF document deleted successfully', success: true })
+      } catch (e: any) {
+         console.error('Failed to delete PDF:', e)
+         reply.status(404).send({ error: e.message || 'Failed to delete PDF document.' })
+      }
+   },
 }

@@ -1,4 +1,14 @@
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, FileCode, Download, RotateCcw } from 'lucide-react'
+import {
+   UploadCloud,
+   FileText,
+   CheckCircle2,
+   AlertCircle,
+   Loader2,
+   FileCode,
+   Download,
+   RotateCcw,
+   Trash2,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { env } from '@/config/env'
@@ -11,10 +21,18 @@ interface PdfManagerProps {
    uploadStatus?: Map<string | number, string>
    onUploadPDF: () => void
    onRetryUpload?: (pdf: UserPdfItem) => void
+   onDeletePDF?: (pdf: UserPdfItem) => void
    className?: string
 }
 
-export function PdfManager({ pdfs, uploadStatus, onUploadPDF, onRetryUpload, className }: PdfManagerProps) {
+export function PdfManager({
+   pdfs,
+   uploadStatus,
+   onUploadPDF,
+   onRetryUpload,
+   onDeletePDF,
+   className,
+}: PdfManagerProps) {
    return (
       <Card className={`flex flex-col h-full overflow-hidden shadow-sm border ${className ?? ''}`}>
          <CardHeader className="border-b py-3 px-6">
@@ -128,6 +146,16 @@ export function PdfManager({ pdfs, uploadStatus, onUploadPDF, onRetryUpload, cla
                                        >
                                           <Download className="h-4 w-4" />
                                        </a>
+                                    )}
+
+                                    {onDeletePDF && (
+                                       <button
+                                          onClick={() => onDeletePDF(pdf)}
+                                          title="Delete PDF & Vectors"
+                                          className="p-1 text-muted-foreground hover:text-red-600 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-950/50"
+                                       >
+                                          <Trash2 className="h-4 w-4" />
+                                       </button>
                                     )}
                                  </div>
                               </div>

@@ -22,3 +22,22 @@ export async function getVectorStore(collectionName = 'pdf-rag'): Promise<Qdrant
    }
    return vectorStoreInstance
 }
+
+export async function deleteVectorsByPdf(pdfId: string, filename: string, collectionName = 'pdf-rag'): Promise<void> {
+   const store = await getVectorStore(collectionName)
+   if (store.client) {
+      try {
+         await store.client.delete(collectionName, {
+            filter: {
+               should: [
+                  { key: 'metadata.pdfId', match: { value: pdfId } },
+                  { key: 'metadata.filename', match: { value: filename } },
+               ],
+            },
+         })
+         console.log(`Deleted Qdrant vector points for pdfId: ${pdfId}, filename: ${filename}`)
+      } catch (err) {
+         console.error('Failed to delete vectors from Qdrant:', err)
+      }
+   }
+}

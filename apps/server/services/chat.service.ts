@@ -1,9 +1,10 @@
 import { conversationRepository } from '../repositories/conversition.repositor'
 import { Queue } from 'bullmq'
-import { getVectorStore } from '../lib/vectorStore'
+import { getVectorStore, deleteVectorsByPdf } from '../lib/vectorStore'
 import genai from '../lib/genai'
 import pdfRepository from '../repositories/pdf.repository'
 import type { ReferencePdf, ChatResponse } from '../types/chat.types'
+import fs from 'fs'
 
 export type { ReferencePdf, ChatResponse }
 
@@ -114,5 +115,28 @@ export const chatService = {
          name: pdf.originalName,
          url: `/uploads/pdf/${pdf.filename}`,
       }))
+   },
+
+   async deleteUserPdf(pdfId: string, userId: string): Promise<boolean> {
+      // 1. Delete document record from MongoDB
+      const pdf = await pdfRepository.deletePdf(pdfId, userId)
+      if (!pdf) {
+         throw new Error('PDF document not found or unauthorized.')
+      }
+
+      // 2. Delete vectors from Qdrant
+      await deleteVectorsByPdf(pdfId, pdf.filename)
+
+      // 3. Remove physical PDF file on disk
+      if (pdf.path && fs.existsSync(pdf.path)) {
+         try {
+            fs.unlinkSync(pdf.path)
+            console.log('Deleted physical PDF file:', pdf.path)
+         } catch (err) {
+            console.error('Failed to unlink PDF file:', err)
+         }
+      }
+
+      return true
    },
 }
