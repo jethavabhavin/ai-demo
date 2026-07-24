@@ -1,17 +1,13 @@
 import { Worker } from 'bullmq'
-import { QdrantVectorStore } from '@langchain/qdrant'
-import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai'
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf'
 import dotenv from 'dotenv'
 import path from 'path'
+import { getVectorStore } from './lib/vectorStore'
 
 dotenv.config({ path: path.resolve(__dirname, '.env') })
 dotenv.config()
 
-const embeddings = new GoogleGenerativeAIEmbeddings({
-   apiKey: process.env.GEMINI_API_KEY,
-   modelName: 'models/gemini-embedding-001',
-})
+const vectorStore = await getVectorStore()
 
 console.log(`Worker starting on REDIS_HOST=${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`)
 const BATCH_SIZE = 1 // still limited by Gemini's rate limit, not Qdrant
@@ -73,10 +69,6 @@ const worker = new Worker(
          const docs = await loader.load()
          console.log(`Loaded ${docs.length} document chunk(s).`)
 
-         const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
-            url: process.env.QDRANT_URL,
-            collectionName: 'pdf-rag',
-         })
          await embedAndUpsertInBatches(vectorStore, docs)
 
          console.log(`Indexed PDF into Qdrant collection 'pdf-rag' for job ${job.id}`)

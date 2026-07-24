@@ -18,7 +18,13 @@ export const chatSchema = {
       200: {
          type: 'object',
          properties: {
-            message: { type: 'string' },
+            message: {
+               type: 'object',
+               properties: {
+                  id: { type: 'string' },
+                  message: { type: 'string' },
+               },
+            },
          },
       },
    },

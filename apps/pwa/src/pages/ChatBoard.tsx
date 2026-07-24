@@ -1,8 +1,10 @@
 import { useState } from 'react'
 
 import { ChatContainer, type Message } from '@/components/ChatContainer'
+import { useAuth } from '@/context/AuthContext'
 
 export default function ChatBoard() {
+   const { token } = useAuth()
    const [messages, setMessages] = useState<Message[]>([])
    const [prompt, setPrompt] = useState('')
    const [loading, setLoading] = useState(false)
@@ -25,6 +27,7 @@ export default function ChatBoard() {
          const res = await fetch('/api/chat', {
             method: 'POST',
             headers: {
+               Authorization: `Bearer ${token}`,
                'Content-Type': 'application/json',
             },
             body: JSON.stringify({

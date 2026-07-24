@@ -1,20 +1,15 @@
-import OpenAI from 'openai'
 import { conversationRepository } from '../repositories/conversition.repositor'
 import { Queue } from 'bullmq'
+import { getVectorStore } from '../lib/vectorStore'
+import genai from '../lib/genai'
+
+const vectorStore = await getVectorStore()
 
 const queue = new Queue('pdf-rag-upload-queue', {
    connection: {
       host: process.env.REDIS_HOST || 'localhost',
       port: Number(process.env.REDIS_PORT) || 6379,
    },
-})
-// const openai = new OpenAI({
-//    apiKey: process.env.OPENAI_API_KEY,
-// })
-
-const openai = new OpenAI({
-   baseURL: 'https://zenmux.ai/api/v1',
-   apiKey: process.env.ZENMUX_API_KEY,
 })
 
 type ChatResponse = {
@@ -24,25 +19,40 @@ type ChatResponse = {
 
 export const chatService = {
    async sendMessage(prompt: string, convId: string): Promise<ChatResponse> {
-      // const response = await openai.responses.create({
-      //    model: 'openai/gpt-4o-mini',
-      //    input: prompt,
-      //    temperature: 0.2,
-      //    max_output_tokens: 50,
-      //    previous_response_id: conversationRepository.getLastResponseId(convId),
-      // })
-      const response = await openai.chat.completions.create({
-         model: 'openai/gpt-4o-mini',
-         messages: [
-            {
-               role: 'user',
-               content: 'What is the meaning of life?',
-            },
-         ],
+      if (!genai) {
+         throw new Error('Google Generative AI client is not initialized. Please verify GEMINI_API_KEY in .env.')
+      }
+
+      const model = genai.getGenerativeModel({ model: 'gemini-3.6-flash' })
+      const result = await model.generateContent(prompt)
+      const answer = result.response.text() ?? ''
+      const id = crypto.randomUUID()
+      conversationRepository.setLastResponseId(convId, id)
+      return { id, message: answer }
+   },
+
+   async sendPDfRagMessage(prompt: string, convId: string): Promise<ChatResponse> {
+      if (!genai) {
+         throw new Error('Google Generative AI client is not initialized. Please verify GEMINI_API_KEY in .env.')
+      }
+
+      const ret = vectorStore.asRetriever({
+         k: 2,
       })
-      console.log(response.choices[0]?.message.content)
-      conversationRepository.setLastResponseId(convId, response.id)
-      return { id: response.id, message: 'response.choices[0]?.message.content' }
+      const resultDocs = await ret.invoke(prompt)
+      const contextText = resultDocs.map((doc) => doc.pageContent).join('\n\n')
+
+      const SYSTEM_PROMPT = 'Answer the question based on the context provided.'
+      const fullPrompt = `${SYSTEM_PROMPT}\n\nDocuments Context:\n${contextText}\n\nUser Question: ${prompt}`
+
+      const model = genai.getGenerativeModel({ model: 'gemini-3.6-flash' })
+      const result = await model.generateContent(fullPrompt)
+      const answer = result.response.text() ?? ''
+      const id = crypto.randomUUID()
+
+      console.log('answer', answer)
+      conversationRepository.setLastResponseId(convId, id)
+      return { id, message: answer }
    },
 
    async pdfRagUpload(file: any): Promise<boolean> {
