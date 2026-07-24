@@ -1,5 +1,6 @@
 import { ChatContainer } from '@/components/ChatContainer'
 import { PdfManager } from '@/components/PdfManager'
+import { ToastContainer } from '@/components/ui/toast'
 import { usePdfRag } from '@/hooks/pdfs'
 
 export default function PDFRag() {
@@ -9,6 +10,8 @@ export default function PDFRag() {
       messages,
       prompt,
       setPrompt,
+      toasts,
+      dismissToast,
       isChatLoading,
       sendMessage,
       triggerFilePicker,
@@ -16,7 +19,7 @@ export default function PDFRag() {
    } = usePdfRag()
 
    return (
-      <div className="min-h-screen bg-muted/30 p-4 md:p-6 lg:p-8 flex flex-col items-center">
+      <div className="min-h-screen bg-muted/30 p-4 md:p-6 lg:p-8 flex flex-col items-center relative">
          <div className="w-full max-w-7xl flex flex-col gap-6">
             {/* Header */}
             <div className="flex items-center justify-between border-b pb-4">
@@ -57,6 +60,9 @@ export default function PDFRag() {
                </div>
             </div>
          </div>
+
+         {/* Auto-Fading Toast Notifications */}
+         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       </div>
    )
 }
