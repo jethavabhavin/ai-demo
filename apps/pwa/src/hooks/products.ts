@@ -1,26 +1,16 @@
-// hooks/useProducts.ts
 import {
    keepPreviousData,
    useMutation,
    useQuery,
    useQueryClient,
-   type UseMutateFunction,
    type UseMutationResult,
    type UseQueryResult,
 } from '@tanstack/react-query'
 import type Product from '@/type/product'
+import type { PaginatedData } from '@/type/product'
 import { env } from '@/config/env'
 import { useAuth } from '@/context/AuthContext'
-interface PaginatedData<T> {
-   data: T[]
-   pagination: {
-      page: number
-      totalPages: number
-      total: number
-      hasPrevPage: boolean
-      hasNextPage: boolean
-   }
-}
+
 async function fetchProducts(
    authToken: string,
    search?: string,
@@ -57,7 +47,6 @@ async function deleteProduct(authToken: string, id: string): Promise<void> {
    if (!res.ok) {
       throw new Error('Failed to delete product')
    }
-   // No need to parse response body for delete operation
    return
 }
 
@@ -74,10 +63,7 @@ export function useProducts(
       placeholderData: keepPreviousData,
    })
 
-   return {
-      data: queryResult.data,
-      ...queryResult,
-   }
+   return queryResult
 }
 
 export function useDeleteProduct(): UseMutationResult<void, Error, string> {

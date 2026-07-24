@@ -4,3 +4,14 @@ export default interface Product {
    status: boolean
    price: number
 }
+
+export interface PaginatedData<T> {
+   data: T[]
+   pagination: {
+      page: number
+      totalPages: number
+      total: number
+      hasPrevPage: boolean
+      hasNextPage: boolean
+   }
+}

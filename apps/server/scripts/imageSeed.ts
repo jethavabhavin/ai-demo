@@ -10,9 +10,12 @@ async function seed() {
    const client = new MongoClient(uri)
    try {
       await client.connect()
-      const db = client.db('productCollection')
-      const collection = db.collection('images')
-
+      const dbName = process.env.DB_NAME
+      if (!dbName) {
+         throw new Error('DB_NAME is not defined.')
+      }
+      const db = client.db(dbName)
+      await db.createCollection('images')
       console.log(`Initialize images collection.`)
    } catch (err) {
       console.error('Seed failed:', err)

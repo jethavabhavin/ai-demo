@@ -1,84 +1,68 @@
-import { useState } from 'react'
-import { UploadCloud } from 'lucide-react'
+import { ChatContainer } from '@/components/ChatContainer'
+import { PdfManager } from '@/components/PdfManager'
+import { ToastContainer } from '@/components/ui/toast'
+import { usePdfRag } from '@/hooks/pdfs'
 
 export default function PDFRag() {
-   const [pdfs, setPdfs] = useState<File[] | null>(null)
-   const [uploadStatus, setUploadStatus] = useState<Map<number, string>>()
-   const updateUploadStatus = (status: string, index: number) => {
-      setUploadStatus((prev) => {
-         let arr = new Map(prev)
-         arr.set(index, status)
-         return arr
-      })
-   }
-   const uploadPDF = async (formData: FormData, index: number) => {
-      try {
-         const res = await fetch('/api/upload-pdf-rag', {
-            method: 'POST',
-            body: formData,
-         })
-
-         if (!res.ok) {
-            const errorBody = await res.json().catch(() => ({}))
-            console.error('Upload failed:', res.status, errorBody)
-            updateUploadStatus('Failed', index)
-            return
-         }
-
-         updateUploadStatus('Success', index)
-      } catch (err) {
-         updateUploadStatus('Failed', index)
-      }
-   }
-   const pdfUploadHandler = () => {
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = '.pdf'
-      input.addEventListener('change', async (e: Event) => {
-         const target = e.target as HTMLInputElement
-         const file = target?.files?.[0]
-         if (file) {
-            const idx = pdfs?.length || 0
-            setPdfs((prev) => (prev ? [...prev, file] : [file]))
-            updateUploadStatus('Uploading...', idx)
-            const formData = new FormData()
-            formData.append('pdf', file)
-            await uploadPDF(formData, idx)
-         }
-      })
-      input.click()
-   }
+   const {
+      pdfs,
+      uploadStatus,
+      messages,
+      prompt,
+      setPrompt,
+      toasts,
+      dismissToast,
+      isChatLoading,
+      sendMessage,
+      triggerFilePicker,
+      handleDeletePdf,
+   } = usePdfRag()
 
    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-         <div className="w-full max-w-7xl rounded-xl bg-white p-8 shadow-md">
-            <h2 className="mb-6 text-center text-2xl font-semibold text-gray-800">PDF RAG</h2>
-            <div className="flex w-full max-h-screen">
-               <div className="p-2 w-[50%] h-[70vh] border-2 border-dashed rounded-xl">
-                  <div className="bg-gray-50 p-2 gap-1">
-                     List of pdf
-                     <ul className="w-fill">
-                        {pdfs?.map((pdf, idx) => (
-                           <li className={`p-2 m-1 rounded ${idx % 2 == 0 ? 'bg-blue-100' : 'bg-gray-50'}`} key={idx}>
-                              <div className="flex">
-                                 <div className="p-1">{pdf.name}</div>
-                                 <div className="p-1">{uploadStatus?.get(idx)}</div>
-                              </div>
-                           </li>
-                        ))}
-                     </ul>
-                  </div>
-                  <div
-                     className="flex bg-gray-100 max-h-16 items-center justify-center border-2 rounded p-2 w-full h-full gap-2"
-                     onClick={pdfUploadHandler}
-                  >
-                     <label>Upload PDF </label>
-                     <UploadCloud className="h-6 w-6" />
-                  </div>
+      <div className="min-h-screen bg-muted/30 p-4 md:p-6 lg:p-8 flex flex-col items-center relative">
+         <div className="w-full max-w-7xl flex flex-col gap-6">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b pb-4">
+               <div>
+                  <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                     📚 PDF Knowledge Base RAG
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                     Upload PDF documents to vector storage and query them using AI.
+                  </p>
                </div>
-               <div className="w-[50%] h-[70vh] border-2 border-dashed rounded-xl">Chat</div>
+            </div>
+
+            {/* Content Layout Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[78vh]">
+               {/* Left Column: PDF Manager */}
+               <PdfManager
+                  className="lg:col-span-5"
+                  pdfs={pdfs}
+                  uploadStatus={uploadStatus}
+                  onUploadPDF={triggerFilePicker}
+                  onRetryUpload={triggerFilePicker}
+                  onDeletePDF={handleDeletePdf}
+               />
+
+               {/* Right Column: Chat Assistant */}
+               <div className="lg:col-span-7 h-full">
+                  <ChatContainer
+                     title="🤖 PDF RAG Assistant"
+                     className="h-full w-full shadow-sm border"
+                     messages={messages}
+                     loading={isChatLoading}
+                     prompt={prompt}
+                     onPromptChange={setPrompt}
+                     onSendMessage={sendMessage}
+                     placeholder="Ask questions about your uploaded PDFs..."
+                  />
+               </div>
             </div>
          </div>
+
+         {/* Auto-Fading Toast Notifications */}
+         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       </div>
    )
 }
