@@ -8,7 +8,7 @@ if (!fs.existsSync(UPLOAD_DIR)) {
    fs.mkdirSync(UPLOAD_DIR, { recursive: true })
 }
 
-const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
+const MAX_SIZE_BYTES = 15 * 1024 * 1024 // 15MB
 const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
 
 interface UploadStats {
@@ -65,7 +65,7 @@ export const uploadService = {
       const buffer = Buffer.from(base64Data, 'base64')
 
       if (buffer.byteLength > MAX_SIZE_BYTES) {
-         throw new Error('Image exceeds maximum allowed size (5MB)')
+         throw new Error('Image exceeds maximum allowed size (100MB)')
       }
 
       const filename = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${extensionFromMime(mimetype)}`

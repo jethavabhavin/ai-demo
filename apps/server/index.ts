@@ -22,14 +22,31 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 
 const app = Fastify({
    logger: true,
-   bodyLimit: 10 * 1024 * 1024, // 10mb limit
+   bodyLimit: 100 * 1024 * 1024, // 100MB limit
 })
 
 // 1. Register the Express compatibility plugin
 await app.register(fastifyExpress)
 
 // Register multipart to handle file uploads
-await app.register(multipart)
+await app.register(multipart, {
+   limits: {
+      fileSize: 100 * 1024 * 1024, // 100MB limit
+   },
+})
+
+// Custom error handler for file size and body limits
+app.setErrorHandler((error: any, request, reply) => {
+   if (error?.code === 'LIMIT_FILE_SIZE' || error?.code === 'FST_ERR_CTP_BODY_TOO_LARGE') {
+      return reply.status(413).send({
+         statusCode: 413,
+         code: error.code,
+         error: 'Payload Too Large',
+         message: 'File size exceeds the maximum allowed limit (100MB).',
+      })
+   }
+   reply.send(error)
+})
 
 await app.register(cors, {
    origin: true,

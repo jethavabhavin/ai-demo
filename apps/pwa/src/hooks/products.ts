@@ -73,10 +73,7 @@ export function useProducts(
       placeholderData: keepPreviousData,
    })
 
-   return {
-      data: queryResult.data,
-      ...queryResult,
-   }
+   return queryResult
 }
 
 export function useDeleteProduct(): UseMutationResult<void, Error, string> {
