@@ -17,7 +17,7 @@ const queue = new Queue('pdf-rag-upload-queue', {
    },
 })
 
-export const chatService = {
+export class ChatService {
    async sendMessage(prompt: string, convId: string): Promise<ChatResponse> {
       if (!genai) {
          throw new Error('Google Generative AI client is not initialized. Please verify GEMINI_API_KEY in .env.')
@@ -29,7 +29,7 @@ export const chatService = {
       const id = crypto.randomUUID()
       conversationRepository.setLastResponseId(convId, id)
       return { id, message: answer }
-   },
+   }
 
    async sendPDfRagMessage(prompt: string, convId: string, userId: string): Promise<ChatResponse> {
       if (!genai) {
@@ -80,7 +80,7 @@ export const chatService = {
       console.log('PDF RAG Answer generated for user', userId)
       conversationRepository.setLastResponseId(convId, id)
       return { id, message: answer, references }
-   },
+   }
 
    async pdfRagUpload(file: any, userId: string): Promise<boolean> {
       // 1. Store metadata in MongoDB
@@ -106,7 +106,7 @@ export const chatService = {
 
       console.log('PDF record saved & added to BullMQ indexing queue for user:', userId)
       return true
-   },
+   }
 
    async getUserPdfs(userId: string) {
       const pdfs = await pdfRepository.getUserPdfs(userId)
@@ -115,7 +115,7 @@ export const chatService = {
          name: pdf.originalName,
          url: `/uploads/pdf/${pdf.filename}`,
       }))
-   },
+   }
 
    async deleteUserPdf(pdfId: string, userId: string): Promise<boolean> {
       // 1. Delete document record from MongoDB
@@ -138,5 +138,8 @@ export const chatService = {
       }
 
       return true
-   },
+   }
 }
+
+export const chatService = new ChatService()
+export default chatService

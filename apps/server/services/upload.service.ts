@@ -50,7 +50,7 @@ function extensionFromMime(mimetype: string) {
    return map[mimetype] ?? ''
 }
 
-export const uploadService = {
+export class UploadService {
    async upload(imageDataUrl: string): Promise<boolean> {
       if (!imageDataUrl || typeof imageDataUrl !== 'string') {
          throw new Error('No image provided')
@@ -75,5 +75,8 @@ export const uploadService = {
 
       const result = await uploadRepository.saveImage(filename)
       return result
-   },
+   }
 }
+
+export const uploadService = new UploadService()
+export default uploadService

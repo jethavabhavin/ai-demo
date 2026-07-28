@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import { userService } from '../services/user.service'
 
-export const UserController = {
+export class UserControllerClass {
    async login(req: FastifyRequest<{ Body: { email: string; password: string } }>, reply: FastifyReply) {
       const { email, password } = req.body
       try {
@@ -11,5 +11,8 @@ export const UserController = {
       } catch (e) {
          reply.status(500).send({ error: 'Failed to generate response.' })
       }
-   },
+   }
 }
+
+export const UserController = new UserControllerClass()
+export default UserController

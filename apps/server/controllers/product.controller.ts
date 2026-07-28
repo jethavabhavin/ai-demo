@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import { productService } from '../services/product.service'
 
-export const ProductController = {
+export class ProductControllerClass {
    async getProducts(req: FastifyRequest, reply: FastifyReply) {
       try {
          const { search, limit, page } = req.query as { search: string; limit: number; page: number }
@@ -10,7 +10,7 @@ export const ProductController = {
       } catch (e) {
          reply.status(500).send({ error: 'Failed to generate response.' })
       }
-   },
+   }
 
    async deleteProduct(req: FastifyRequest, reply: FastifyReply) {
       try {
@@ -20,5 +20,8 @@ export const ProductController = {
       } catch (e) {
          reply.status(500).send({ error: 'Failed to generate response.' })
       }
-   },
+   }
 }
+
+export const ProductController = new ProductControllerClass()
+export default ProductController

@@ -2,7 +2,7 @@ import { getDb } from '../lib/mongodb'
 import type { Product } from '../types/product.types'
 import { ObjectId } from 'mongodb'
 
-const productRepository = {
+export class ProductRepository {
    async getProducts(search: string, skip: number, limit: number): Promise<{ data: Product[]; total: number }> {
       try {
          const db = await getDb()
@@ -15,7 +15,8 @@ const productRepository = {
          console.log(e)
          throw new Error('Failed to fetch products from database')
       }
-   },
+   }
+
    async delete(id: string) {
       try {
          const db = await getDb()
@@ -27,7 +28,8 @@ const productRepository = {
          console.log(e)
          throw new Error('Failed to delete product from database')
       }
-   },
+   }
 }
 
+export const productRepository = new ProductRepository()
 export default productRepository
