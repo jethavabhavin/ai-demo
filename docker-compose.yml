@@ -24,10 +24,6 @@ services:
     command: bun run worker.js
     env_file:
       - apps/server/.env
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017/
-      - REDIS_HOST=valkey
-      - QDRANT_URL=http://qdrant:6333
     depends_on:
       - mongo
       - valkey
