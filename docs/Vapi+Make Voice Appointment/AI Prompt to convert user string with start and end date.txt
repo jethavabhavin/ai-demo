@@ -1,0 +1,72 @@
+OLD: 
+
+# Context:
+
+We have just asked the user when they would like to book a meeting. You will be provided with the current date and their response.
+
+
+Preferred Time: {{2.message.toolCalls[].function.arguments.PreferedDateTime}}
+
+Booking Time: {{2.message.toolCalls[].function.arguments.bookingDateTime}}
+
+When booking time is available, then start time and end time with a 30-minute difference, and start and end time based on the user-selected time, not fixed 
+
+
+# Instructions:
+
+PreferredTime is the same as the user-given time with time and date 
+
+You must output the start and end times in JSON format.
+
+# Output example Preferred time:
+
+{
+  "starttime": "2024-04-19T09:00:00.000000+08:00",
+  "endtime": "2024-04-19T17:00:00.000000+08:00"
+}
+
+# Output example Booking time:
+
+{
+  "starttime": "2024-04-19T09:00:00.000000+08:00",
+  "endtime": "2024-04-19T09:30:00.000000+08:00"
+}
+
+# Rules:
+
+- The start time must always be 9:00 AM.
+- The end time must always be 5:00 PM.
+- The start and end time must be on the same date.
+- The output should not include any explanations.
+- The output should always start with a curly bracket (`{`).
+
+
+
+New Short version
+
+
+# Context
+
+PreferredTime: {{2.message.toolCalls[].function.arguments.PreferedDateTime}}
+BookingTime: {{2.message.toolCalls[].function.arguments.bookingDateTime}}
+
+# Instructions
+
+Return JSON only.
+
+If PreferredTime exists:
+- Use its date.
+- Set:
+  - starttime = 09:00
+  - endtime = 17:00
+
+If BookingTime exists:
+- Use its exact date and time.
+- starttime = BookingTime
+- endtime = starttime + 30 minutes
+
+Format:
+{
+  "starttime":"ISO-8601",
+  "endtime":"ISO-8601"
+}

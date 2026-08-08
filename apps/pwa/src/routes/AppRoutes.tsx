@@ -6,7 +6,7 @@ import ChatBoard from '@/pages/ChatBoard'
 import PdfRag from '@/pages/PdfRag'
 import Upload from '@/pages/Upload'
 import ProductList from '@/pages/ProductList'
-
+import LogicalShowcase from '@/pages/LogicalShowcase'
 export default function AppRoutes() {
    const { isAuthenticated, logout } = useAuth()
 
@@ -21,6 +21,9 @@ export default function AppRoutes() {
             </Link>
             <Link to="/pdf-rag" className="hover:text-blue-600">
                PDF Rag
+            </Link>
+            <Link to="/ai-voice-appointment" className="hover:text-blue-600">
+               AI Voice Appointment
             </Link>
             <Link to="/upload" className="hover:text-blue-600">
                Upload
@@ -64,6 +67,14 @@ export default function AppRoutes() {
                element={
                   <ProtectedRoute>
                      <PdfRag />
+                  </ProtectedRoute>
+               }
+            />
+            <Route
+               path="/logical-showcase"
+               element={
+                  <ProtectedRoute>
+                     <LogicalShowcase />
                   </ProtectedRoute>
                }
             />
