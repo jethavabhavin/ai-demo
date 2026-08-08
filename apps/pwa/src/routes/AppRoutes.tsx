@@ -22,8 +22,8 @@ export default function AppRoutes() {
             <Link to="/pdf-rag" className="hover:text-blue-600">
                PDF Rag
             </Link>
-            <Link to="/ai-voice-appointment" className="hover:text-blue-600">
-               AI Voice Appointment
+            <Link to="/logical-showcase" className="hover:text-blue-600">
+               Logical Showcase
             </Link>
             <Link to="/upload" className="hover:text-blue-600">
                Upload
