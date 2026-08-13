@@ -7,12 +7,16 @@ import PdfRag from '@/pages/PdfRag'
 import Upload from '@/pages/Upload'
 import ProductList from '@/pages/ProductList'
 import LogicalShowcase from '@/pages/LogicalShowcase'
+import ClinicPage from '@/pages/ClinicPage'
 export default function AppRoutes() {
    const { isAuthenticated, logout } = useAuth()
 
    return (
       <>
          <nav className="flex items-center gap-4 border-b border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm">
+            <Link to="/clinic" className="font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1">
+               <span>🏥 Clinic AI</span>
+            </Link>
             <Link to="/" className="hover:text-blue-600">
                Home
             </Link>
@@ -46,6 +50,14 @@ export default function AppRoutes() {
 
          <Routes>
             <Route path="/login" element={<Login />} />
+            <Route
+               path="/clinic"
+               element={
+                  <ProtectedRoute>
+                     <ClinicPage />
+                  </ProtectedRoute>
+               }
+            />
             <Route
                path="/"
                element={
