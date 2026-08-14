@@ -7,7 +7,7 @@
       "start": "bun run index.ts",
       "dev": "bun run --watch index.ts",
       "worker": "bun run worker.js",
-      "seed": "bun run scripts/userSeed.ts && bun run scripts/productSeed.ts && bun run scripts/imageSeed.ts && bun run scripts/pdfSeed.ts",
+      "seed": "bun run scripts/userSeed.ts && bun run scripts/productSeed.ts && bun run scripts/imageSeed.ts && bun run scripts/pdfSeed.ts && bun run scripts/doctorSeed.ts",
       "build": "bun build ./index.ts --target=node --outdir=dist"
    },
    "devDependencies": {
@@ -30,6 +30,7 @@
       "@langchain/core": "^1.2.3",
       "@langchain/google": "^0.2.1",
       "@langchain/google-genai": "^2.2.0",
+      "@langchain/langgraph": "^1.4.9",
       "@langchain/openai": "^1.5.5",
       "@langchain/qdrant": "^1.0.3",
       "@qdrant/js-client-rest": "^1.18.0",
@@ -39,8 +40,10 @@
       "dotenv": "^17.4.2",
       "fastify": "^5.10.0",
       "fastify-multer": "^2.0.3",
+      "googleapis": "^174.0.1",
       "jsonwebtoken": "^9.0.3",
       "langchain": "^1.5.3",
+      "langsmith": "^0.8.10",
       "mongodb": "6.12.0",
       "multer": "^2.2.0",
       "openai": "^6.45.0",
