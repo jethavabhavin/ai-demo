@@ -7,7 +7,7 @@ function getUserId(req: any): string {
    return user.id || user._id || user.sub || ''
 }
 
-export const ChatController = {
+export class ChatControllerClass {
    async sendMessage(req: FastifyRequest, reply: FastifyReply) {
       const { convId, prompt } = req.body as { convId: string; prompt: string }
       try {
@@ -16,7 +16,7 @@ export const ChatController = {
       } catch (e) {
          reply.status(500).send({ error: 'Failed to generate response.' })
       }
-   },
+   }
 
    async sendPDfMessage(req: FastifyRequest, reply: FastifyReply) {
       const { convId, prompt } = req.body as { convId: string; prompt: string }
@@ -28,7 +28,7 @@ export const ChatController = {
          console.error('PDF Chat Error:', e)
          reply.status(500).send({ error: 'Failed to generate response.' })
       }
-   },
+   }
 
    async uploadPDFRag(req: any, reply: FastifyReply) {
       const file = req.file
@@ -38,7 +38,7 @@ export const ChatController = {
       }
       await chatService.pdfRagUpload(file, userId)
       reply.send({ status: 'File uploaded successfully', file: file })
-   },
+   }
 
    async getUserPdfs(req: FastifyRequest, reply: FastifyReply) {
       const userId = getUserId(req)
@@ -49,7 +49,7 @@ export const ChatController = {
          console.error('Failed to get user PDFs:', e)
          reply.status(500).send({ error: 'Failed to fetch user PDFs.' })
       }
-   },
+   }
 
    async deleteUserPdf(req: FastifyRequest, reply: FastifyReply) {
       const { id } = req.params as { id: string }
@@ -61,5 +61,8 @@ export const ChatController = {
          console.error('Failed to delete PDF:', e)
          reply.status(404).send({ error: e.message || 'Failed to delete PDF document.' })
       }
-   },
+   }
 }
+
+export const ChatController = new ChatControllerClass()
+export default ChatController

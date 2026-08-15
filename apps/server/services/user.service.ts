@@ -10,7 +10,7 @@ type LoginResponse = {
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET as string
 
-export const userService = {
+export class UserService {
    async login(email: string, password: string): Promise<LoginResponse> {
       const user = await userRepository.getUserByEmail(email)
       if (!user) {
@@ -24,5 +24,8 @@ export const userService = {
       const token = jwt.sign({ id: user._id, email: user.email }, ACCESS_SECRET, { expiresIn: '1h' })
 
       return { id: user._id, token: token, message: 'Login successful' }
-   },
+   }
 }
+
+export const userService = new UserService()
+export default userService

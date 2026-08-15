@@ -10,6 +10,7 @@ export default defineConfig({
       proxy: {
          '/api': 'http://localhost:3001',
       },
+      allowedHosts: ['racism-parted-custard.ngrok-free.dev'],
    },
    resolve: {
       alias: {
