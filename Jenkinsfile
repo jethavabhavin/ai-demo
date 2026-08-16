@@ -120,24 +120,10 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "Deploying Docker container..."
-
-                bat '''
-                    docker stop ai-demo 2>NUL || exit /b 0
-                    docker rm ai-demo 2>NUL || exit /b 0
-                '''
-
-                bat "docker pull ${IMAGE_NAME}:latest"
-
-                bat '''
-                    docker run -d ^
-                        --name ai-demo ^
-                        -p 3001:3001 ^
-                        -p 5173:5173 ^
-                        bhavin42/ai-demo:latest
-                '''
-
-                bat 'docker ps'
+                echo "Deploying full stack with Docker Compose..."
+                bat 'docker compose down'
+                bat 'docker compose up -d'
+                bat 'docker compose ps'
             }
         }
     }
