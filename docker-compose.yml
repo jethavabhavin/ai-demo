@@ -1,38 +1,6 @@
 services:
-  api:
-    build:
-      context: .
-      dockerfile: apps/server/Dockerfile
-    command: sh -c "bun run seed && bun run index.ts"
-    ports:
-      - "3001:3001"
-    env_file:
-      - apps/server/.env
-    depends_on:
-      - mongo
-      - valkey
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/server/node_modules
-    restart: unless-stopped
-
-  worker:
-    build:
-      context: .
-      dockerfile: apps/server/Dockerfile
-    command: bun run worker.js
-    env_file:
-      - apps/server/.env
-    depends_on:
-      - mongo
-      - valkey
-      - qdrant
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/server/node_modules
-    restart: unless-stopped
+  app:
+    image: bhavin42/ai-demo:latest
 
   mongo:
     image: mongo:7
