@@ -22,6 +22,26 @@ pipeline {
                 echo "Git checkout completed"
             }
         }
+        
+        stage('Generate .env File') {
+            steps {
+                echo "Generating .env file..."
+                withCredentials([
+                    file(credentialsId: 'ServerEnv', variable: 'ENV_FILE')
+                ]) {
+                    bat 'copy /Y "%ENV_FILE%" ./apps/server/.env'
+                }
+                echo ".env file generated"
+                
+                echo "Generating .env file..."
+                withCredentials([
+                    file(credentialsId: 'PwaEnv', variable: 'ENV_FILE')
+                ]) {
+                    bat 'copy /Y "%ENV_FILE%" ./apps/pwa/.env'
+                }
+                echo ".env file generated"
+            }
+        }
 
         stage('Check Environment') {
             steps {
