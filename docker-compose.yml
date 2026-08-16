@@ -16,23 +16,6 @@ services:
       - "6379:6379"
     restart: unless-stopped
 
-  frontend:
-    build:
-      context: .
-      dockerfile: apps/pwa/Dockerfile
-    command: bun run dev --host 0.0.0.0
-    ports:
-      - "5173:5173"
-    env_file:
-      - apps/pwa/.env
-    depends_on:
-      - api
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/pwa/node_modules
-    restart: unless-stopped
-
   qdrant:
     image: qdrant/qdrant
     ports:
