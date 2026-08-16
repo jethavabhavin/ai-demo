@@ -25,21 +25,21 @@ pipeline {
         
         stage('Generate .env File') {
             steps {
-                echo "Generating .env file..."
+                echo "Generating server .env file..."
                 withCredentials([
                     file(credentialsId: 'ServerEnv', variable: 'ENV_FILE')
                 ]) {
-                    bat 'copy /Y "%ENV_FILE%" ./apps/server/.env'
+                    bat 'copy /Y "%ENV_FILE%" "apps\\server\\.env"'
                 }
-                echo ".env file generated"
-                
-                echo "Generating .env file..."
+                echo "Server .env file generated"
+
+                echo "Generating pwa .env file..."
                 withCredentials([
                     file(credentialsId: 'PwaEnv', variable: 'ENV_FILE')
                 ]) {
-                    bat 'copy /Y "%ENV_FILE%" ./apps/pwa/.env'
+                    bat 'copy /Y "%ENV_FILE%" "apps\\pwa\\.env"'
                 }
-                echo ".env file generated"
+                echo "PWA .env file generated"
             }
         }
 
