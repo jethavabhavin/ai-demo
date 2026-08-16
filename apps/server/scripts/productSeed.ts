@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename)
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') })
 dotenv.config()
 
-const uri = (process.env.MONGODB_URI || 'mongodb://localhost:27017/') as string
+const uri = process.env.MONGODB_URI as string
 // scripts/products100.ts
 
 const initialProducts = [

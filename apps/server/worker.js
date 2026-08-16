@@ -10,7 +10,7 @@ dotenv.config()
 
 const vectorStore = await getVectorStore()
 
-console.log(`Worker starting on REDIS_HOST=${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`)
+console.log(`Worker starting on REDIS_HOST=${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`)
 const BATCH_SIZE = process.env.WORKER_BATCH_SIZE || 10 // limited by Gemini's rate limit
 const MAX_RETRIES = process.env.WORKER_MAX_RETRIES || 2
 const BASE_DELAY_MS = process.env.WORKER_BASE_DELAY_MS || 5000
@@ -103,8 +103,8 @@ const worker = new Worker(
    {
       concurrency: 1,
       connection: {
-         host: process.env.REDIS_HOST || 'localhost',
-         port: Number(process.env.REDIS_PORT) || 6379,
+         host: process.env.REDIS_HOST,
+         port: Number(process.env.REDIS_PORT),
       },
    },
 )
