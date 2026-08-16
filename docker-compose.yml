@@ -1,6 +1,9 @@
 services:
   app:
     image: bhavin42/ai-demo:latest
+    ports:
+      - "3001:3001"
+      - "5173:5173"
 
   mongo:
     image: mongo:7
