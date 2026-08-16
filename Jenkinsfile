@@ -121,7 +121,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deploying full stack with Docker Compose..."
-                bat 'docker compose down'
+                bat 'docker compose down --remove-orphans'
                 bat 'docker compose up -d'
                 bat 'docker compose ps'
             }
