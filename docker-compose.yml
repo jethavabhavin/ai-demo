@@ -1,18 +1,28 @@
 services:
   server:
     image: bhavin42/ai-demo:latest
-    working_dir: /app/
+    working_dir: /app/apps/server
     command: bun run start
     ports:
       - "3001:3001"
-      - "5173:5173"
     env_file:
       - apps/server/.env
-      - apps/pwa/.env
     depends_on:
       - mongo
       - valkey
       - qdrant
+    restart: unless-stopped
+
+  pwa:
+    image: bhavin42/ai-demo:latest
+    working_dir: /app/apps/pwa
+    command: bun run dev --host 0.0.0.0
+    ports:
+      - "5173:5173"
+    env_file:
+      - apps/pwa/.env
+    depends_on:
+      - server
     restart: unless-stopped
 
   mongo:
