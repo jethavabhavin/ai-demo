@@ -6,6 +6,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'bhavin42/ai-demo'
         IMAGE_TAG = "${BUILD_NUMBER}"
+        SONAR_HOME = tool 'SonarQubeScanner'
     }
 
     stages {
@@ -96,6 +97,59 @@ pipeline {
                 // bat 'npm test'
 
                 echo "Testing completed"
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo "SonarQube analysis started..."
+
+                    withSonarQubeEnv('SonarQubeServer') {
+                        bat """
+                            "${SONAR_HOME}/bin/sonar-scanner" ^
+                            -Dsonar.projectKey=ai-demo ^
+                            -Dsonar.projectName=ai-demo ^
+                            -Dsonar.sources=. ^
+                            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.git/**,**/.husky/**
+                        """
+                    }
+
+                    echo "SonarQube analysis completed"
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    echo "Checking SonarQube Quality Gate..."
+                    timeout(time: 2, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
+
+        stage('Trivy Security Scan') {
+            steps {
+                script {
+                    echo "Running Trivy security scan via Docker..."
+                    bat "docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --no-progress --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}"
+                    // bat "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --no-progress --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        
+        stage('OWASP Dependency Check') {
+            steps {
+                script {
+                    echo "Running OWASP Dependency-Check security scan via Docker..."
+                    // owasp_dependency();
+                    // dependencyCheck additionalArguments: '--scan ./', odcInstallation: "OWASP"
+                    // dependencyCheckPublisher pattern: '**/reports/dependency-check-report.xml'
+                }
             }
         }
 
