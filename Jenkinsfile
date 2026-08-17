@@ -136,10 +136,28 @@ pipeline {
 
         success {
             echo "Successfully built, pushed and deployed ${IMAGE_NAME}:${IMAGE_TAG}"
+
+            emailext attachLog: true,
+            from: 'bhavindami@gmail.com',
+            to: 'jethava.bhavin@gmail.com',
+            subject: 'Build #${BUILD_NUMBER} - SUCCESS',
+            body: """
+                <h1>Build #${BUILD_NUMBER} - SUCCESS</h1>
+                <p>Successfully built, pushed and deployed ${IMAGE_NAME}:${IMAGE_TAG}</p>
+            """
         }
 
         failure {
             echo "Pipeline failed for Build #${BUILD_NUMBER}"
+
+            emailext attachLog: true,
+            from: 'bhavindami@gmail.com',
+            to: 'jethava.bhavin@gmail.com',
+            subject: 'Build #${BUILD_NUMBER} - FAILURE',
+            body: """
+                <h1>Build #${BUILD_NUMBER} - FAILURE</h1>
+                <p>Pipeline failed for Build #${BUILD_NUMBER}</p>
+            """
         }
     }
 }
