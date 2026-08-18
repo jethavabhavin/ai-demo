@@ -37,8 +37,13 @@ Built with a high-performance **Bun Workspace Monorepo**, Fastify backend, React
 - **Interactive Swagger Docs**: OpenAPI specification generated automatically at `/api/docs`.
 
 ### 🛒 4. Products & General Chat
-- **Product Management**: Paginated product catalog listing and deletion handlers.
-- **General AI Assistant**: Standalone AI chat board for non-document queries.
+### 🛡️ 5. Automated CI/CD & DevSecOps Pipeline
+- **Jenkins Declarative Pipeline**: Automated build, test, and container deployment.
+- **SonarQube & Quality Gate**: Static code analysis and automated quality enforcement.
+- **Trivy Container Scanning**: Docker-based vulnerability scanner filtering HIGH/CRITICAL CVEs.
+- **OWASP Dependency Check**: Software composition analysis for open-source library vulnerabilities.
+- **Automated Docker Hub Publishing & Deployment**: Automated tag builds, multi-container orchestration, and email notifications.
+- 📖 **Full Pipeline Documentation**: [docs/JENKINS_CI_CD.md](docs/JENKINS_CI_CD.md)
 
 ---
 
@@ -50,6 +55,7 @@ Built with a high-performance **Bun Workspace Monorepo**, Fastify backend, React
 | **Backend API (`apps/server`)** | Fastify, TypeScript, `@fastify/jwt`, `@fastify/multipart`, Swagger UI |
 | **AI & Vector Engine** | Google Generative AI (Gemini), LangChain, Qdrant Vector DB |
 | **Data & Messaging** | MongoDB, BullMQ, Redis / Valkey |
+| **CI/CD & DevSecOps** | Jenkins, SonarQube, Trivy, OWASP Dependency Check, Docker Hub |
 | **Runtime & Tooling** | Bun Workspaces, Docker Compose, Prettier, Husky |
 
 ---
@@ -59,6 +65,7 @@ Built with a high-performance **Bun Workspace Monorepo**, Fastify backend, React
 ```
 ai-demo/
 ├── docs/
+│   ├── JENKINS_CI_CD.md       # Complete Jenkins CI/CD & DevSecOps Pipeline Guide
 │   └── images/                # Application preview screenshots
 │       ├── pdf_rag_preview.png
 │       └── chatboard_preview.png
