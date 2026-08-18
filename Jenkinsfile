@@ -7,6 +7,7 @@ pipeline {
         IMAGE_NAME = 'bhavin42/ai-demo'
         IMAGE_TAG = "${BUILD_NUMBER}"
         SONAR_HOME = tool 'SonarQubeScanner'
+        DOCKER_BUILDKIT = '1'
     }
 
     stages {

@@ -1,10 +1,13 @@
-node_modules
+**/node_modules
 **/.env
 **/.env.*
 *.log
 .git
 .gitignore
-dist
+.husky
+docs
+apps/server/uploads
+**/dist
 coverage
 Dockerfile
 docker-compose.yml
