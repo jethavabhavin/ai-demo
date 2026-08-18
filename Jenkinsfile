@@ -211,41 +211,29 @@ pipeline {
 
 
         // ============================================================
-        // 10. DOCKER HUB LOGIN
-        // ============================================================
-        stage('Docker Login') {
-            steps {
-
-                script {
-
-                    echo "Docker login started..."
-
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'DockerHub',
-                            usernameVariable: 'DOCKER_USER',
-                            passwordVariable: 'DOCKER_PASS'
-                        )
-                    ]) {
-                        
-                        bat '''
-                            docker logout
-                            echo %DOCKER_PASS%| docker login -u %DOCKER_USER% --password-stdin
-                        '''
-                    }
-                    
-                    echo "Docker login completed"
-                }
-            }
-        }
-
-
-        // ============================================================
         // 11. PUSH IMAGE
         // ============================================================
         stage('Push Image to Docker Hub') {
             steps {
 
+                echo "Docker login started..."
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'DockerHub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    
+                    bat '''
+                        docker logout
+                        echo %DOCKER_PASS%| docker login -u %DOCKER_USER% --password-stdin
+                    '''
+                }
+                
+                echo "Docker login completed"
+                
                 echo "Pushing image to Docker Hub..."
 
                 bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
