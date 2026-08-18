@@ -14,7 +14,7 @@ RUN mkdir -p /app && chown -R bun:bun /app
 FROM base AS dependencies
 
 # Copy monorepo package definitions with ownership
-COPY --chown=bun:bun package.json bun.lock* ./
+COPY --chown=bun:bun package.json bun.lock ./
 COPY --chown=bun:bun apps/server/package.json ./apps/server/
 COPY --chown=bun:bun apps/pwa/package.json ./apps/pwa/
 

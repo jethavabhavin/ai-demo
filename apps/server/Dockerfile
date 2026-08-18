@@ -10,7 +10,7 @@ RUN mkdir -p /app && chown -R bun:bun /app
 # Stage 2: Dependencies Installation
 # ==========================================
 FROM base AS dependencies
-COPY --chown=bun:bun package.json bun.lock* ./
+COPY --chown=bun:bun package.json bun.lock ./
 COPY --chown=bun:bun apps/server/package.json ./apps/server/
 COPY --chown=bun:bun apps/pwa/package.json ./apps/pwa/
 
