@@ -30,8 +30,6 @@ WORKDIR /app
 
 # Copy cached dependencies directly from dependencies stage
 COPY --from=dependencies --chown=bun:bun /app/node_modules ./node_modules
-COPY --from=dependencies --chown=bun:bun /app/apps/server/node_modules ./apps/server/node_modules
-COPY --from=dependencies --chown=bun:bun /app/apps/pwa/node_modules ./apps/pwa/node_modules
 
 # Copy application source code directly with non-root ownership (No recursive chown!)
 COPY --chown=bun:bun . .

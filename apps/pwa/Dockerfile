@@ -24,7 +24,6 @@ FROM base AS runner
 WORKDIR /app
 
 COPY --from=dependencies --chown=bun:bun /app/node_modules ./node_modules
-COPY --from=dependencies --chown=bun:bun /app/apps/pwa/node_modules ./apps/pwa/node_modules
 COPY --chown=bun:bun . .
 
 WORKDIR /app/apps/pwa
