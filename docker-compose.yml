@@ -5,9 +5,28 @@ services:
     command: sh -c "bun run seed && bun run start"
     ports:
       - "3001:3001"
+    volumes:
+      - uploads_data:/app/apps/server/uploads
     env_file:
       - apps/server/.env
     depends_on:
+      - mongo
+      - valkey
+      - qdrant
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+  worker:
+    image: bhavin42/ai-demo:latest
+    working_dir: /app/apps/server
+    command: bun run worker
+    volumes:
+      - uploads_data:/app/apps/server/uploads
+    env_file:
+      - apps/server/.env
+    depends_on:
+      - server
       - mongo
       - valkey
       - qdrant
@@ -61,3 +80,5 @@ networks:
 
 volumes:
   mongo_data:
+  uploads_data:
+
