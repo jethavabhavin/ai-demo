@@ -1,3 +1,4 @@
+@Library('Shared') _
 pipeline {
     agent {
         label 'LocalWindows'
@@ -7,7 +8,9 @@ pipeline {
         IMAGE_NAME = 'bhavin42/ai-demo'
         IMAGE_TAG = "${BUILD_NUMBER}"
         SONAR_HOME = tool 'SonarQubeScanner'
-        DOCKER_BUILDKIT = '1'
+        DOCKER_BUILDKIT = 1
+        EMAIL_FROM = 'bhavindami@gmail.com'
+        EMAIL_TO = 'jethava.bhavin@gmail.com'
     }
 
     stages {
@@ -17,318 +20,153 @@ pipeline {
         // ============================================================
         stage('Checkout Code') {
             steps {
-                echo "Git checkout started"
-
-                git(
+                checkoutCode(
                     url: 'https://github.com/jethavabhavin/ai-demo',
                     branch: 'main'
                 )
-
-                echo "Git checkout completed"
             }
         }
-
 
         // ============================================================
         // 2. GENERATE ENV FILES
         // ============================================================
         stage('Generate Environment Files') {
             steps {
-
-                echo "Generating server .env file..."
-
-                withCredentials([
-                    file(credentialsId: 'ServerEnv', variable: 'ENV_FILE')
-                ]) {
-                    bat 'copy /Y "%ENV_FILE%" "apps\\server\\.env"'
-                }
-
-                echo "Server .env file generated"
-
-
-                echo "Generating PWA .env file..."
-
-                withCredentials([
-                    file(credentialsId: 'PwaEnv', variable: 'ENV_FILE')
-                ]) {
-                    bat 'copy /Y "%ENV_FILE%" "apps\\pwa\\.env"'
-                }
-
-                echo "PWA .env file generated"
+                generateEnvFiles(
+                    serverCredentialsId: 'ServerEnv',
+                    pwaCredentialsId: 'PwaEnv'
+                )
             }
         }
-
 
         // ============================================================
         // 3. CHECK ENVIRONMENT
         // ============================================================
         stage('Check Environment') {
             steps {
-
-                echo "Checking Windows environment..."
-
-                bat 'docker --version'
-                bat 'docker info'
-                bat 'git --version'
+                checkEnvironment()
             }
         }
-
 
         // ============================================================
         // 4. INSTALL DEPENDENCIES / TEST
         // ============================================================
         stage('Testing') {
             steps {
-
-                echo "Testing started..."
-
-                // Add your actual tests here.
-
-                // Example:
-                // bat 'bun install --frozen-lockfile'
-                // bat 'bun test'
-
-                echo "Testing completed"
+                runTests()
             }
         }
-
 
         // ============================================================
         // 5. SONARQUBE ANALYSIS
         // ============================================================
         stage('SonarQube Analysis') {
             steps {
-
                 script {
-
-                    echo "SonarQube analysis started..."
-
-                    withSonarQubeEnv('SonarQubeServer') {
-
-                        bat """
-                            "${SONAR_HOME}/bin/sonar-scanner" ^
-                            -Dsonar.projectKey=ai-demo ^
-                            -Dsonar.projectName=ai-demo ^
-                            -Dsonar.sources=. ^
-                            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.git/**,**/.husky/**
-                        """
-                    }
-
-                    echo "SonarQube analysis completed"
+                    sonarAnalysis(
+                        serverName: 'SonarQubeServer',
+                        projectKey: 'ai-demo',
+                        projectName: 'ai-demo'
+                    )
                 }
             }
         }
-
 
         // ============================================================
         // 6. SONAR QUALITY GATE
         // ============================================================
         stage('Quality Gate') {
             steps {
-
                 script {
-
-                    echo "Checking SonarQube Quality Gate..."
-
-                    timeout(time: 2, unit: 'MINUTES') {
-
-                        waitForQualityGate(
-                            abortPipeline: true
-                        )
-                    }
+                    sonarQualityGate(
+                        timeoutMinutes: 2,
+                        abortPipeline: true
+                    )
                 }
             }
         }
-
 
         // ============================================================
         // 7. BUILD DOCKER IMAGE
         // ============================================================
         stage('Build Docker Image') {
             steps {
-
-                echo "Docker Build started..."
-
-                bat """
-                    docker build ^
-                    -t ${IMAGE_NAME}:${IMAGE_TAG} ^
-                    -t ${IMAGE_NAME}:latest .
-                """
-
-                echo "Docker Build completed"
+                buildDockerImage(
+                    imageName: env.IMAGE_NAME,
+                    imageTag: env.IMAGE_TAG
+                )
             }
         }
-
 
         // ============================================================
         // 8. TRIVY SECURITY SCAN
         // ============================================================
         stage('Trivy Security Scan') {
             steps {
-
                 script {
-
-                    echo "Running Trivy security scan..."
-
-                    bat """
-                        docker run --rm ^
-                        -v //var/run/docker.sock:/var/run/docker.sock ^
-                        aquasec/trivy:latest image ^
-                        --no-progress ^
-                        --exit-code 1 ^
-                        --severity HIGH,CRITICAL ^
-                        ${IMAGE_NAME}:${IMAGE_TAG}
-                    """
+                    echo "trivyScan"
+                    trivyScan(
+                        imageName: env.IMAGE_NAME,
+                        imageTag: env.IMAGE_TAG,
+                        severity: 'HIGH,CRITICAL',
+                        exitCode: 1
+                    )
                 }
             }
-        }   
-
+        }
 
         // ============================================================
         // 9. OWASP DEPENDENCY CHECK
         // ============================================================
         stage('OWASP Dependency Check') {
             steps {
-
                 script {
-
-                    echo "Running OWASP Dependency Check..."
-
-                    // Example if configured in Jenkins:
-                    //
-                    // dependencyCheck(
-                    //     additionalArguments: '--scan ./',
+                    echo "owaspScan"
+                    // owaspScan(
+                    //     scanPath: './',
                     //     odcInstallation: 'OWASP'
                     // )
-                    //
-                    // dependencyCheckPublisher(
-                    //     pattern: '**/reports/dependency-check-report.xml'
-                    // )
-
-                    echo "OWASP Dependency Check completed"
                 }
             }
         }
 
-
         // ============================================================
-        // 11. PUSH IMAGE
+        // 10. PUSH IMAGE
         // ============================================================
         stage('Push Image to Docker Hub') {
             steps {
-
-                echo "Docker login started..."
-
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'DockerHub',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    
-                    bat '''
-                        docker logout
-                        echo %DOCKER_PASS%| docker login -u %DOCKER_USER% --password-stdin
-                    '''
-                }
-                
-                echo "Docker login completed"
-                
-                echo "Pushing image to Docker Hub..."
-
-                bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-
-                bat "docker push ${IMAGE_NAME}:latest"
-
-                echo "Docker images pushed successfully"
+                pushDockerImage(
+                    credentialsId: 'DockerHub',
+                    imageName: env.IMAGE_NAME,
+                    imageTag: env.IMAGE_TAG
+                )
             }
         }
 
-
         // ============================================================
-        // 12. DEPLOY
+        // 11. DEPLOY
         // ============================================================
         stage('Deploy') {
             steps {
-
-                echo "Deploying application with Docker Compose..."
-
-                bat 'docker compose down --remove-orphans'
-
-                bat 'docker compose up -d'
-
-                bat 'docker compose ps'
+                deployApp()
             }
         }
     }
-
 
     // ================================================================
     // POST ACTIONS
     // ================================================================
     post {
-
         success {
-
-            echo "Successfully built, scanned, pushed and deployed ${IMAGE_NAME}:${IMAGE_TAG}"
-
-            emailext(
-                attachLog: true,
-                from: 'bhavindami@gmail.com',
-                to: 'jethava.bhavin@gmail.com',
-                subject: "Build #${BUILD_NUMBER} - SUCCESS",
-                body: """
-                    <h1>Build #${BUILD_NUMBER} - SUCCESS</h1>
-
-                    <p>
-                        Successfully built, scanned, pushed and deployed:
-                    </p>
-
-                    <p>
-                        <b>${IMAGE_NAME}:${IMAGE_TAG}</b>
-                    </p>
-
-                    <p>
-                        Docker Image:
-                        ${IMAGE_NAME}:latest
-                    </p>
-                """
-            )
+            notifySuccess()
         }
-
 
         failure {
-
-            echo "Pipeline failed for Build #${BUILD_NUMBER}"
-
-            emailext(
-                attachLog: true,
-                from: 'bhavindami@gmail.com',
-                to: 'jethava.bhavin@gmail.com',
-                subject: "Build #${BUILD_NUMBER} - FAILURE",
-                body: """
-                    <h1>Build #${BUILD_NUMBER} - FAILURE</h1>
-
-                    <p>
-                        Pipeline failed for Build #${BUILD_NUMBER}.
-                    </p>
-
-                    <p>
-                        Please check the Jenkins console log.
-                    </p>
-                """
-            )
+            notifyFailure()
         }
 
-
         always {
-
-            echo "Cleaning workspace..."
-
-            cleanWs()
-
-            bat 'docker logout'
+            cleanWorkspace()
         }
     }
 }
